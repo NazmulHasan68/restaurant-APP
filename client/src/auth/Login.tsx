@@ -1,16 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { LoginInputState, userLoginSchema } from "@/schema/userSchema";
 import { Loader2, LockKeyhole, Mail } from "lucide-react";
 import React, { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 
 
 // typescript me type define krne ka 2 type hotahe 
-interface LoginInputState {
-    email : string,
-    password: string,
-}
 
 
 const Login = () => {
@@ -18,12 +15,19 @@ const Login = () => {
         email : "",
         password : ""
     })
+    const [erros , setErros] = useState<Partial<LoginInputState>>({})
     const changeEventHandler = (e:ChangeEvent<HTMLInputElement>) =>{
         const {name , value} = e.target;
         setinput({...input, [name]:value})
     }
     const loginSubmitHandler = (e:FormEvent)=>{
         e.preventDefault()
+        const result = userLoginSchema.safeParse(input);
+        if(!result.success){
+            const fieldErrors = result.error.formErrors.fieldErrors
+            setErros(fieldErrors as Partial <LoginInputState>)
+            return
+        }
         console.log(input);
         
     }
@@ -48,6 +52,7 @@ const Login = () => {
               className="pl-10 focus:outline-none"
             />
             <Mail className="absolute inset-y-2 left-2 text-gray-500 pointer-events-none" />
+            {erros && <span className="text-red-500 text-xs">{erros.email}</span>}
           </div>
         </div>
         <div className="mb-4">
@@ -63,6 +68,8 @@ const Login = () => {
               className="pl-10 focus:outline-none"
             />
             <LockKeyhole className="absolute inset-y-2 left-2 text-gray-500 pointer-events-none" />
+            {erros && <span className="text-red-500 text-xs">{erros.password}</span>}
+
           </div>
         </div>
         <div className="mb-4">
