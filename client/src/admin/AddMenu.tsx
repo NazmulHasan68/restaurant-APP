@@ -13,71 +13,89 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Plus } from "lucide-react";
 import { useState } from "react";
+import EditMenu from "./EditMenu";
+import { MenuFormSchema, menuSchema } from "@/schema/menuSchema";
 
 export default function AddMenu() {
   const [open, setOpen] = useState<boolean>(false); // Dialog state
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Partial<MenuFormSchema>>({})
 
-  const [menuInput, setMenuInput] = useState({
+  const [menuInput, setMenuInput] = useState<MenuFormSchema>({
     name: "",
     description: "",
-    price: "",
-    imageFile: undefined as File | undefined,
+    price: 0,
+    image: undefined as File | undefined,
   });
+
+  
+
+  const [selectedMenu, setSeletectedMenu] = useState<MenuFormSchema>();
 
   const changeMenuHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
     setMenuInput((prev) => ({
       ...prev,
-      [name]: type === "file" ? e.target.files?.[0] || undefined : value,
+      [name]: type === "file" 
+        ? e.target.files?.[0] 
+        : name === "price" 
+        ? (value === "" ? 0 : parseFloat(value)) 
+        : value,
     }));
   };
 
   const handleSubmit = async () => {
-    if (
-      !menuInput.name ||
-      !menuInput.description ||
-      !menuInput.price ||
-      !menuInput.imageFile
-    ) {
-      alert("All fields are required!");
-      return;
+ 
+    const result = menuSchema.safeParse(menuInput);
+    if(!result.success){
+        const fieldErrors =  result.error.formErrors.fieldErrors
+        setErrors(fieldErrors as Partial<MenuFormSchema>)
+        return
     }
 
-    if (isNaN(Number(menuInput.price))) {
-      alert("Please enter a valid price.");
-      return;
-    }
-
-    setLoading(true);
-
-    const formData = new FormData();
-    formData.append("name", menuInput.name);
-    formData.append("description", menuInput.description);
-    formData.append("price", menuInput.price);
-    formData.append("image", menuInput.imageFile);
-
+     
     try {
-      // Example API call to submit form data
-      // await fetch("/api/menus", { method: "POST", body: formData });
-      console.log("Submitting form data:", formData);
-      alert("Menu added successfully!");
       setMenuInput({
         name: "",
         description: "",
-        price: "",
-        imageFile: undefined,
+        price: 0,
+        image: undefined,
       });
-      setOpen(false); // Close the dialog after successful submission
+      setOpen(false); 
     } catch (error) {
-      alert("Failed to add menu.");
+    //   alert("Failed to add menu.");
     } finally {
       setLoading(false);
     }
   };
 
+  //demo menu
+  const menus = [
+    {
+      name: "Birynani",
+      image: Image,
+      description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. ",
+      price: 800,
+    },
+    {
+      name: "Birynani",
+      image: Image,
+      description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. ",
+      price: 100,
+    },
+    {
+      name: "Birynani",
+      image: Image,
+      description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. ",
+      price: 100,
+    },
+  ];
+
+  const [editOpen ,setEditopen] = useState<boolean>(false)
+
+
   return (
-    <div className="max-w-6xl mx-auto my-10">
+    <div className="max-w-5xl mx-auto my-10">
       <div className="flex justify-between">
         <h1 className="font-bold md:font-extrabold text-lg md:text-2xl">
           Available Menus
@@ -90,7 +108,7 @@ export default function AddMenu() {
               Add Menus
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="">
             <DialogHeader>
               <DialogHeader className="mt-5">
                 <DialogTitle>Add A New Menu</DialogTitle>
@@ -115,6 +133,7 @@ export default function AddMenu() {
                       value={menuInput.name}
                       onChange={changeMenuHandler}
                     />
+                    {errors && <span className="text-xs font-medium text-red-500">{errors.name}</span>}
                   </div>
 
                   <div>
@@ -126,6 +145,7 @@ export default function AddMenu() {
                       value={menuInput.description}
                       onChange={changeMenuHandler}
                     />
+                     {errors && <span className="text-xs font-medium text-red-500">{errors.description}</span>}
                   </div>
 
                   <div>
@@ -137,6 +157,7 @@ export default function AddMenu() {
                       value={menuInput.price}
                       onChange={changeMenuHandler}
                     />
+                     {errors && <span className="text-xs font-medium text-red-500">{errors.price}</span>}
                   </div>
 
                   <div>
@@ -147,6 +168,7 @@ export default function AddMenu() {
                       accept="image/*"
                       onChange={changeMenuHandler}
                     />
+                     {errors && <span className="text-xs font-medium text-red-500">{errors.image?.name|| "Image is required"}</span>}
                   </div>
                 </div>
 
@@ -173,30 +195,38 @@ export default function AddMenu() {
           </DialogContent>
         </Dialog>
       </div>
-      <div className="mt-6 space-y-4 ">
-        <div className="flex flex-col md:flex-row md:items-center md:space-x-4 md:p-4 p-2 shadow-md rounded-lg">
-          <img
-            src={Image}
-            alt="menu image"
-            className="md:h-24 md:w-24 h-16 w-full object-cover rounded-xl"
-          />
-          <div className="flex-1">
-            <h1 className="text-lg font-semibold text-gray-800">Birynai</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit.
-            </p>
-            <h2 className="text-md font-semibold">
-              Price : <span className="text-[#D19254]">80</span>
-            </h2>
+      {menus.map((menu: any, idx: number) => (
+        <div key={idx} className="mt-6 space-y-4 ">
+          <div className="flex flex-col md:flex-row md:items-center md:space-x-4 md:p-4 p-2 shadow-md rounded-lg">
+            <img
+              src={menu.image}
+              alt="menu image"
+              className="md:h-24 md:w-24 h-16 w-full object-cover rounded-xl"
+            />
+            <div className="flex-1">
+              <h1 className="text-lg font-semibold text-gray-800">
+                {menu.name}
+              </h1>
+              <p className="text-sm text-gray-500 mt-1">{menu.description}</p>
+              <h2 className="text-md font-semibold">
+                Price : <span className="text-[#D19254]">{menu.Price}</span>
+              </h2>
+            </div>
+            <Button
+              size={"icon"}
+              onClick={() => {
+                setSeletectedMenu(menu)
+                setEditopen(true)
+              }}
+              className="bg-orange hover:bg-hoverOrange rounded-xl mt-2 w-full md:w-fit md:px-4"
+            >
+              Edit
+            </Button>
           </div>
-          <Button
-            size={"icon"}
-            className="bg-orange hover:bg-hoverOrange rounded-xl mt-2 w-full md:w-fit md:px-4"
-          >
-            Edit
-          </Button>
         </div>
-      </div>
+      ))}
+
+      <EditMenu selectedMenu={selectedMenu} editOpen={editOpen} setEditopen={setEditopen} />
     </div>
   );
 }
