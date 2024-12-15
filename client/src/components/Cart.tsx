@@ -2,14 +2,17 @@ import { Minus, Plus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "./ui/table";
+import { useState } from "react";
+import CheckoutConfirmPage from "./CheckoutConfirmPage";
 
 function Cart() {
+    const [open , setopen] = useState<boolean>(false)
   return (
     <div className="flex flex-col max-w-7xl mx-auto my-10">
       <div className="flex justify-end">
         <Button variant="link">Clear all</Button>
       </div>
-      <Table>
+      <Table className="min-w-[600px] ">
         <TableCaption>A list of your recent invoices.</TableCaption>
         <TableHeader>
           <TableRow>
@@ -45,15 +48,16 @@ function Cart() {
             </TableRow>
         </TableBody>
         <TableFooter>
-          <TableRow>
+          <TableRow className="text-xl font-semibold">
             <TableCell colSpan={5}>Total</TableCell>
             <TableCell className="text-right">$2,500.00</TableCell>
           </TableRow>
         </TableFooter>
       </Table>
       <div className="flex justify-end my-5">
-        <Button className="bg-orange hover:bg-hoverOrange rounded-xl"> Proced To CHeckout</Button>
+        <Button onClick={()=>setopen(true)} className="bg-orange hover:bg-hoverOrange rounded-xl"> Proced To CHeckout</Button>
       </div>
+      <CheckoutConfirmPage open={open} setopen={setopen}/>
     </div>
   );
 }
