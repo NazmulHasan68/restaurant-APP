@@ -11,6 +11,7 @@ import Profile from './components/Profile'
 import SearchPage from './components/SearchPage'
 import Restaurant from './components/Restaurant'
 import Cart from './components/Cart'
+import RestaurantAdmin from './admin/Restaurant'
 
 const appRouter = createBrowserRouter([
   {
@@ -36,6 +37,10 @@ const appRouter = createBrowserRouter([
       {
         path : "/cart",
         element :<Cart/>
+      },
+      {
+        path : "/admin/restaurant",
+        element :<RestaurantAdmin/>
       }
     ]
   },
