@@ -177,7 +177,7 @@ const MobileNavbar = () => {
                 <UtensilsCrossed/>
                 <span>Restaurant</span>
             </Link>
-            <Link to='/admin/order' className="flex items-center gap-4 hover:bg-gray-200 px-3 py-2 rounded-lg cursor-pointer font-medium text-gray-800">
+            <Link to='/admin/orders' className="flex items-center gap-4 hover:bg-gray-200 px-3 py-2 rounded-lg cursor-pointer font-medium text-gray-800">
                 <PackageCheck/>
                 <span>Restaurant order</span>
             </Link>

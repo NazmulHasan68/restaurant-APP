@@ -93,7 +93,6 @@ export default function AddMenu() {
 
   const [editOpen ,setEditopen] = useState<boolean>(false)
 
-
   return (
     <div className="max-w-5xl mx-auto my-10">
       <div className="flex justify-between">
@@ -195,6 +194,7 @@ export default function AddMenu() {
           </DialogContent>
         </Dialog>
       </div>
+
       {menus.map((menu: any, idx: number) => (
         <div key={idx} className="mt-6 space-y-4 ">
           <div className="flex flex-col md:flex-row md:items-center md:space-x-4 md:p-4 p-2 shadow-md rounded-lg">
@@ -209,7 +209,7 @@ export default function AddMenu() {
               </h1>
               <p className="text-sm text-gray-500 mt-1">{menu.description}</p>
               <h2 className="text-md font-semibold">
-                Price : <span className="text-[#D19254]">{menu.Price}</span>
+                Price : <span className="text-[#D19254]">{menu.price}</span>
               </h2>
             </div>
             <Button

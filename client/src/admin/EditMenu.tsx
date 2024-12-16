@@ -37,7 +37,7 @@ function EditMenu({
         name: selectedMenu?.name || "",
         description: selectedMenu?.description || "",
         price: selectedMenu?.price || "",
-        image: undefined,
+        image: selectedMenu?.image || undefined,
       });
     }
   }, [selectedMenu]);
@@ -51,29 +51,12 @@ function EditMenu({
   };
 
   const handleSubmit = async () => {
-    if (!menuInput.name || !menuInput.description || !menuInput.price || !menuInput.image) {
-      alert("All fields are required!");
-      return;
-    }
-
-    if (isNaN(Number(menuInput.price))) {
-      alert("Please enter a valid price.");
-      return;
-    }
-
+  
     setLoading(true);
 
     console.log(menuInput);
     
-    const formData = new FormData();
-    formData.append("name", menuInput.name);
-    formData.append("description", menuInput.description);
-    formData.append("price", menuInput.price);
-    formData.append("image", menuInput.image);
-
     try {
-      console.log("Form Data Submitted:", formData);
-      
       alert("Menu updated successfully!");
       setEditopen(false);
     } catch (error) {
