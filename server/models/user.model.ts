@@ -1,5 +1,5 @@
-import { IUser, IUserDocument } from './user.model';
-import mongoose from "mongoose";
+
+import mongoose, { Document } from "mongoose";
 
 export interface IUser {
     fullname :string,
