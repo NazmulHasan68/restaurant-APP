@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import crypto from 'crypto'
+import cloudinary from "../utils/cloudinary.js";
 
 
 export const signup = async (req: Request, res: Response) => {
@@ -15,7 +16,7 @@ export const signup = async (req: Request, res: Response) => {
       });
     }
     const hashedPassword = await bcrypt.hash("password", 10);
-    const verificationToken = "sdf";
+    const verificationToken = "sdf"; // 
     user = await User.create({
       fullname,
       email,
@@ -221,6 +222,17 @@ export const updateProfile = async(req:Request, res:Response)=>{
         const {fullname, email, address, city, country, profilePicture} = req.body
 
         //upload Profile cloudinary
+        let cloudResponse:any;
+        cloudResponse = await cloudinary.uploader.upload(profilePicture);
+
+        const updatedData = {fullname, email, address, city, country, profilePicture}
+
+        const user = await User.findByIdAndUpdate(userId, updatedData, {new:true}).select("_password")
+        return res.status(200).json({
+            success : true,
+            user, 
+            message : "Profile updated successfully!"
+        })
 
     } catch (error) {
         console.log(error);
@@ -236,3 +248,4 @@ export const updateProfile = async(req:Request, res:Response)=>{
 // 5. forget password
 // 6. resetPassword
 // 7. checkAuth
+// 8. update profile
