@@ -3,6 +3,9 @@ import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import crypto from 'crypto'
 import cloudinary from "../utils/cloudinary.js";
+import { generateVerificationCode } from "../utils/generateVerificationCode.js";
+import { generateToken } from "../utils/generateToken.js";
+import { sendPasswordResetEamil, sendResetSuccessEamil, sendVerificationEmail, sendWelcomeEmail } from "../mailtrap/email.js";
 
 
 export const signup = async (req: Request, res: Response) => {
@@ -16,7 +19,7 @@ export const signup = async (req: Request, res: Response) => {
       });
     }
     const hashedPassword = await bcrypt.hash("password", 10);
-    const verificationToken = "sdf"; // 
+    const verificationToken = generateVerificationCode() 
     user = await User.create({
       fullname,
       email,
@@ -25,8 +28,9 @@ export const signup = async (req: Request, res: Response) => {
       verificationToken,
       verificationTokenExpireAt: Date.now() + 24 * 60 * 60 * 1000,
     });
-    // generateToken (res, user)
-    // await sendVerificationEmail(email, verification)
+
+    generateToken(res, user)
+    await sendVerificationEmail(email, verificationToken)
     const userwithoutPassword = await User.findOne({ email }).select(
       "-password"
     );
@@ -59,7 +63,7 @@ export const login = async (req: Request, res: Response) => {
         message: "Incorrect email or password!",
       });
     }
-    // generateToken(res,user)
+    generateToken(res,user)
     user.lastLogin = new Date();
     await user.save();
 
@@ -100,7 +104,7 @@ export const verifyEmail = async (req: Request, res: Response) => {
     await user.save();
 
     //send welcome email
-    // await sendWelcomeEmail(user.email, user.fullname)
+    await sendWelcomeEmail(user.email, user.fullname)
 
     return res.status(200).json({
         success:true,
@@ -147,7 +151,7 @@ export const forgotPassword = async(req:Request, res:Response) =>{
         await user.save()
 
         //send eamil
-        // await sendPasswordResetEamil(user.email, `${process.env.FRONTEND_URL}/resetpassword/${token}`)
+        await sendPasswordResetEamil(user.email, `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`)
 
         return res.status(200).json({
             success:true,
@@ -181,7 +185,7 @@ export const resetPassword = async(req:Request, res:Response) =>{
         await user.save()
         
         //send success reset email
-        // await sendRestSuccessEmail(user.email)
+        await sendResetSuccessEamil(user.email)
 
         return res.status(200).json({
             success:true,
