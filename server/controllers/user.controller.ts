@@ -195,13 +195,38 @@ export const resetPassword = async(req:Request, res:Response) =>{
 
 export const checkAuth = async(req:Request, res:Response)=>{
     try {
-        // const userId = 
+        const userId = req.id
+        const user = await User.findById(userId).select("-password")
+
+        if(!user){
+            return res.status(404).json({
+                success : true,
+                message : "user is not found!"
+            })
+        }
+        return res.status(200).json({
+            success : true,
+            user
+        })
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Internal server error , check Auth" });
     }
 }
 
+
+export const updateProfile = async(req:Request, res:Response)=>{
+    try {
+        const userId = req.id;
+        const {fullname, email, address, city, country, profilePicture} = req.body
+
+        //upload Profile cloudinary
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal server error , updateProfile" });
+    }
+}
 
 
 // 1. signup
