@@ -1,255 +1,229 @@
 import { Request, Response } from "express";
-import { User } from "../models/user.model.js";
+import { User } from "../models/user.model";
 import bcrypt from "bcryptjs";
-import crypto from 'crypto'
-import cloudinary from "../utils/cloudinary.js";
-import { generateVerificationCode } from "../utils/generateVerificationCode.js";
-import { generateToken } from "../utils/generateToken.js";
-import { sendPasswordResetEamil, sendResetSuccessEamil, sendVerificationEmail, sendWelcomeEmail } from "../mailtrap/email.js";
+import crypto from "crypto";
+import cloudinary from "../utils/cloudinary";
+import { generateVerificationCode } from "../utils/generateVerificationCode";
+import { generateToken } from "../utils/generateToken";
+import { sendPasswordResetEmail, sendResetSuccessEmail, sendVerificationEmail, sendWelcomeEmail } from "../mailtrap/email";
 
-
-export const signup = async (req: Request, res: Response) => {
-  try {
-    const { fullname, email, password, contact } = req.body();
-    let user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({
-        success: false,
-        message: "User already exist with this email",
-      });
-    }
-    const hashedPassword = await bcrypt.hash("password", 10);
-    const verificationToken = generateVerificationCode() 
-    user = await User.create({
-      fullname,
-      email,
-      password: hashedPassword,
-      contact: Number(contact),
-      verificationToken,
-      verificationTokenExpireAt: Date.now() + 24 * 60 * 60 * 1000,
-    });
-
-    generateToken(res, user)
-    await sendVerificationEmail(email, verificationToken)
-    const userwithoutPassword = await User.findOne({ email }).select(
-      "-password"
-    );
-    return res.status(201).json({
-      success: true,
-      message: "Account created successfully!",
-      user: userwithoutPassword,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error , signup" });
-  }
-};
-
-export const login = async (req: Request, res: Response) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "Incorrect email or password!",
-      });
-    }
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
-    if (isPasswordMatch) {
-      return res.status(400).json({
-        success: false,
-        message: "Incorrect email or password!",
-      });
-    }
-    generateToken(res,user)
-    user.lastLogin = new Date();
-    await user.save();
-
-    //send user without password
-    const userwithoutPassword = await User.findOne({ email }).select(
-      "-password"
-    );
-    return res.status(200).json({
-      success: true,
-      message: `Welcome back ${user.fullname}`,
-      user: userwithoutPassword,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error , login" });
-  }
-};
-
-//email
-export const verifyEmail = async (req: Request, res: Response) => {
-  try {
-    const { verificationCode } = req.body;
-    const user = await User.findOne({
-      verificationToken: verificationCode,
-      verificationTokenExpireAt: { $gt: Date.now() },
-    }).select("-password")
-
-    if(!user){
-        return res.status(400).json({
-            success : false,
-            message : "Invalid or expired verification token"
-        })
-    }
-
-    user.isVerified =  true;
-    user.verificationToken = undefined;
-    user.verificationTokenExpireAt = undefined;
-    await user.save();
-
-    //send welcome email
-    await sendWelcomeEmail(user.email, user.fullname)
-
-    return res.status(200).json({
-        success:true,
-        message : "Email verified successfully!"
-    })
-
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error , verify" });
-  }
-};
-
-
-export const logout = async(req:Request, res:Response) =>{
+// SIGNUP CONTROLLER
+export const signup = async (req: Request, res: Response): Promise<void> => {
     try {
-        return res.clearCookie("token").status(200).json({
-            success : true,
-            message : "Logged out successfully!"
-        })
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: "Internal server error , Logout" });
-    }
-}
+        const { fullname, email, password, contact } = req.body;
 
-
-export const forgotPassword = async(req:Request, res:Response) =>{
-    try {
-        const {email} = req.body;
-        const user = await User.findOne({email})
-
-        if(!user){
-            return res.status(400).json({
-                success:false,
-                message:"User doesn't exist!"
-            })
+        // Check if user already exists
+        if (await User.findOne({ email })) {
+            res.status(400).json({ success: false, message: "User already exists with this email" });
+            return;
         }
 
-        const resetToken = crypto.randomBytes(40).toString('hex')
-        const resetTokenExpiresAt = new Date(Date.now()+1*3600*1000) //1hr
+        // Hash password and create user
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const verificationToken = generateVerificationCode();
+        const newUser = await User.create({
+            fullname,
+            email,
+            password: hashedPassword,
+            contact: Number(contact),
+            verificationToken,
+            verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+        });
 
+        // Generate token and send verification email
+        generateToken(res, newUser);
+        await sendVerificationEmail(email, verificationToken);
+
+        // Respond without password
+        res.status(201).json({
+            success: true,
+            message: "Account created successfully",
+            user: { fullname, email, contact },
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
+
+// LOGIN CONTROLLER
+export const login = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { email, password } = req.body;
+
+        const user = await User.findOne({ email });
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            res.status(400).json({ success: false, message: "Incorrect email or password" });
+            return;
+        }
+
+        generateToken(res, user);
+        user.lastLogin = new Date();
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: `Welcome back, ${user.fullname}`,
+            user: { fullname: user.fullname, email: user.email },
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
+
+// VERIFY EMAIL CONTROLLER
+export const verifyEmail = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { verificationCode } = req.body;
+
+        const user = await User.findOne({
+            verificationToken: verificationCode,
+            verificationTokenExpiresAt: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            res.status(400).json({ success: false, message: "Invalid or expired verification token" });
+            return;
+        }
+
+        user.isVerified = true;
+        user.verificationToken = undefined;
+        user.verificationTokenExpiresAt = undefined;
+        await user.save();
+
+        await sendWelcomeEmail(user.email, user.fullname);
+
+        res.status(200).json({ success: true, message: "Email verified successfully." });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
+
+// LOGOUT CONTROLLER
+export const logout = async (_: Request, res: Response): Promise<void> => {
+    try {
+        res.clearCookie("token").status(200).json({ success: true, message: "Logged out successfully." });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
+
+// FORGOT PASSWORD CONTROLLER
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            res.status(400).json({ success: false, message: "User doesn't exist" });
+            return;
+        }
+
+        const resetToken = crypto.randomBytes(40).toString("hex");
         user.resetPasswordToken = resetToken;
-        user.resetPasswordTokenExpiresAt = resetTokenExpiresAt
-        await user.save()
+        user.resetPasswordTokenExpiresAt = new Date(Date.now() + 3600000 * 24); // 24 hour
+        await user.save();
 
-        //send eamil
-        await sendPasswordResetEamil(user.email, `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`)
+        await sendPasswordResetEmail(user.email, `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`);
 
-        return res.status(200).json({
-            success:true,
-            message : "Password reset like sent to your email!"
-        })
+        res.status(200).json({ success: true, message: "Password reset link sent to your email." });
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: "Internal server error , forgot password" });
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal server error" });
     }
-}
+};
 
-
-export const resetPassword = async(req:Request, res:Response) =>{
+// RESET PASSWORD CONTROLLER
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {token} = req.params
-        const {newPassword} = req.body
-        const user = await User.findOne({resetPasswordToken:token, resetPasswordTokenExpiresAt:{$get:Date.now()}})
+        const { token } = req.params;
+        const { newPassword } = req.body;
 
-        if(!user){
-            return res.status(400).json({
-                success : false,
-                message : "Invalid or expired reset token!"
-            })
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordTokenExpiresAt: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            res.status(400).json({ success: false, message: "Invalid or expired reset token" });
+            return;
         }
-        // update password 
-        const hadhedPassword = await bcrypt.hash(newPassword, 10)
-        user.password = hadhedPassword;
+
+        user.password = await bcrypt.hash(newPassword, 10);
         user.resetPasswordToken = undefined;
         user.resetPasswordTokenExpiresAt = undefined;
+        await user.save();
 
-        await user.save()
-        
-        //send success reset email
-        await sendResetSuccessEamil(user.email)
+        await sendResetSuccessEmail(user.email);
 
-        return res.status(200).json({
-            success:true,
-            message:"Password reset successfully!"
-        })
+        res.status(200).json({ success: true, message: "Password reset successfully." });
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: "Internal server error , reset password" });
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal server error" });
     }
-}
+};
 
-
-export const checkAuth = async(req:Request, res:Response)=>{
-    try {
-        const userId = req.id
-        const user = await User.findById(userId).select("-password")
-
-        if(!user){
-            return res.status(404).json({
-                success : true,
-                message : "user is not found!"
-            })
-        }
-        return res.status(200).json({
-            success : true,
-            user
-        })
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: "Internal server error , check Auth" });
-    }
-}
-
-
-export const updateProfile = async(req:Request, res:Response)=>{
+// UPDATE PROFILE CONTROLLER
+export const updateProfile = async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = req.id;
-        const {fullname, email, address, city, country, profilePicture} = req.body
+        const { fullname, email, address, city, country, profilePicture } = req.body;
 
-        //upload Profile cloudinary
-        let cloudResponse:any;
-        cloudResponse = await cloudinary.uploader.upload(profilePicture);
+        if (!fullname || !email) {
+            res.status(400).json({ success: false, message: "Full name and email are required." });
+            return;
+        }
 
-        const updatedData = {fullname, email, address, city, country, profilePicture}
+        let profileImageURL: string | undefined;
+        if (profilePicture) {
+            try {
+                const cloudResponse = await cloudinary.uploader.upload(profilePicture, { folder: "user_profiles" });
+                profileImageURL = cloudResponse.secure_url;
+            } catch (error) {
+                res.status(500).json({ success: false, message: "Error uploading profile picture." });
+                return;
+            }
+        }
 
-        const user = await User.findByIdAndUpdate(userId, updatedData, {new:true}).select("_password")
-        return res.status(200).json({
-            success : true,
-            user, 
-            message : "Profile updated successfully!"
-        })
+        const updatedData = { fullname, email, address, city, country, profilePicture: profileImageURL };
+        const user = await User.findByIdAndUpdate(userId, updatedData, { new: true }).select("-password");
 
+        if (!user) {
+            res.status(404).json({ success: false, message: "User not found." });
+            return;
+        }
+
+        res.status(200).json({ success: true, message: "Profile updated successfully.", user });
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: "Internal server error , updateProfile" });
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal server error" });
     }
-}
+};
 
+// Auth
+export const checkAuth = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const userId = req.id; // Assuming `id` is set by authentication middleware
+        const user = await User.findById(userId).select("-password");
 
-// 1. signup
-// 2. signin
-// 3. logut
-// 4. email verification
-// 5. forget password
-// 6. resetPassword
-// 7. checkAuth
-// 8. update profile
+        if (!user) {
+            res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+            return; // Just return here, no need to return Response
+        }
+
+        // Respond with user data, excluding password
+        res.status(200).json({
+            success: true,
+            user
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};

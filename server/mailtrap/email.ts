@@ -44,7 +44,7 @@ export const sendWelcomeEmail = async(email:string, name:string)=>{
 }
 
 
-export const sendPasswordResetEamil = async(email:string, resetURL:string) =>{
+export const sendPasswordResetEmail = async(email:string, resetURL:string) =>{
     const recipients = [{email}];
     const htmlContent = generatePasswordResetEmailHtml(resetURL)
     try {
@@ -64,7 +64,7 @@ export const sendPasswordResetEamil = async(email:string, resetURL:string) =>{
 
 
 
-export const sendResetSuccessEamil = async(email:string) =>{
+export const sendResetSuccessEmail = async(email:string) =>{
     const recipients = [{email}];
     const htmlContent = generateResetSuccessEmailHtml()
     try {

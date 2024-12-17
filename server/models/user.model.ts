@@ -16,7 +16,7 @@ export interface IUser {
     resetPasswordToken ?:string ,
     resetPasswordTokenExpiresAt?:Date,
     verificationToken?:string,
-    verificationTokenExpireAt?:Date,
+    verificationTokenExpiresAt?:Date,
 }
 
 export interface IUserDocument extends IUser , Document{
@@ -69,9 +69,9 @@ const userSchema = new mongoose.Schema<IUserDocument>({
         default : false
     },
     resetPasswordToken : String,
-    resetPasswordTokenExpiresAt :Date,
+    resetPasswordTokenExpiresAt : Date,
     verificationToken: String,
-    verificationTokenExpireAt:String,
+    verificationTokenExpiresAt:String,
 },{timestamps:true})
 
 
