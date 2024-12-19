@@ -44,11 +44,11 @@ const orderSchema = new mongoose.Schema<IOrder>({
         city : {type:String, required:true},
     },
     cartItems : [{
-        menuId : {Type :String, required:true},
-        name : {Type :String, required:true},
-        price : {Type :Number, required:true},
-        image : {Type :String, required:true},
-        quantity : {Type :Number, required:true},
+        menuId : {type :String, required:true},
+        name : {type :String, required:true},
+        price : {type :Number, required:true},
+        image : {type :String, required:true},
+        quantity : {type :Number, required:true},
     }],
     totalAmount : Number,
     status : {

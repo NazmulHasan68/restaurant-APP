@@ -1,11 +1,12 @@
 import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
-import userRoute from "./routes/user.route";
 import bodyParser from 'body-parser';
 import cookieParser from "cookie-parser";
 import cors from 'cors';
 import { connectDB } from "./db/connectDB.";
+import userRoute from "./routes/user.route";
+import restaurantRoute from "./routes/restaurant.route";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,6 +27,7 @@ app.use(cors(corsOptions));
 
 // API routes
 app.use("/api/v1/user", userRoute);
+app.use("/api/v1/restaurant", restaurantRoute);
 
 // Start the server and connect to DB
 app.listen(PORT, () => {

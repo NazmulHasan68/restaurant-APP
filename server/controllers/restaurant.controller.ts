@@ -245,7 +245,8 @@ export const searchRestaurant = async (req: Request, res: Response): Promise<voi
 };
 
 
-export const getSingleRestaurant = async (req: Request, res: Response): Promise<Response> => {
+
+export const getSingleRestaurant = async (req: Request, res: Response): Promise<void> => {
     try {
         const restaurantId = req.params.id;
 
@@ -256,23 +257,23 @@ export const getSingleRestaurant = async (req: Request, res: Response): Promise<
         });
 
         if (!restaurant) {
-            return res.status(404).json({
+            res.status(404).json({
                 success: false,
                 message: "Restaurant not found!",
             });
+            return;
         }
 
         // Respond with the restaurant data
-        return res.status(200).json({
+        res.status(200).json({
             success: true,
             data: restaurant,
         });
     } catch (error) {
         console.error("Error fetching single restaurant:", error);
-        return res.status(500).json({
+        res.status(500).json({
             success: false,
             message: "Internal server error",
         });
     }
 };
-

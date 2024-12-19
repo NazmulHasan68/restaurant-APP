@@ -38,12 +38,9 @@ const restaurantSchema = new mongoose.Schema<IRestaurantDocument>({
         type : Number,
         required:true
     },
-    cuisines: [{type:String, required:true}],
+    cuisines: [{type:[String], required:true}],
     menus : [{type :mongoose.Schema.Types.ObjectId, ref:"Menu"}],
-    imageUrl:{
-        type :String,
-        required:true
-    }
+    imageUrl:{ type :String, required:true}
 
 }, {timestamps:true})
 
