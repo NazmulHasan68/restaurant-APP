@@ -192,3 +192,87 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
         });
     }
 };
+
+
+export const searchRestaurant = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const searchText = req.params.searchText || "";
+        const searchQuery = req.query.searchQuery as string || "";
+        const selectedCuisines = (req.query.selectedCuisines as string || "")
+            .split(",")
+            .filter((cuisine) => cuisine);
+
+        const query: any = {};
+
+        // Basic search based on searchText (restaurant name, city, country)
+        if (searchText) {
+            query.$or = [
+                { restaurantName: { $regex: searchText, $options: "i" } },
+                { city: { $regex: searchText, $options: "i" } },
+                { country: { $regex: searchText, $options: "i" } },
+            ];
+        }
+
+        // Filter on the basis of searchQuery
+        if (searchQuery) {
+            query.$or = query.$or || [];
+            query.$or.push(
+                { restaurantName: { $regex: searchQuery, $options: "i" } },
+                { cuisines: { $regex: searchQuery, $options: "i" } }
+            );
+        }
+
+        // Filter by selected cuisines
+        if (selectedCuisines.length > 0) {
+            query.cuisines = { $in: selectedCuisines };
+        }
+
+        // Find restaurants based on the constructed query
+        const restaurants = await Restaurant.find(query);
+
+        // Respond with the found restaurants
+        res.status(200).json({
+            success: true,
+            data: restaurants,
+        });
+    } catch (error) {
+        console.error("Error searching restaurants:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        });
+    }
+};
+
+
+export const getSingleRestaurant = async (req: Request, res: Response): Promise<Response> => {
+    try {
+        const restaurantId = req.params.id;
+
+        // Find restaurant by ID and populate the 'menus' field
+        const restaurant = await Restaurant.findById(restaurantId).populate({
+            path: 'menus',
+            options: { sort: { createdAt: -1 } }, // Sort menus by createdAt descending
+        });
+
+        if (!restaurant) {
+            return res.status(404).json({
+                success: false,
+                message: "Restaurant not found!",
+            });
+        }
+
+        // Respond with the restaurant data
+        return res.status(200).json({
+            success: true,
+            data: restaurant,
+        });
+    } catch (error) {
+        console.error("Error fetching single restaurant:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        });
+    }
+};
+
