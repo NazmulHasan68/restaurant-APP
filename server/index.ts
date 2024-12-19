@@ -18,10 +18,11 @@ app.use(cookieParser());
 
 // CORS configuration
 const corsOptions = {
-  origin: "http://localhost:5173", // Adjust according to your frontend URL
+  origin: "http://localhost:5173", 
   credentials: true
 };
 app.use(cors(corsOptions));
+
 
 // API routes
 app.use("/api/v1/user", userRoute);
