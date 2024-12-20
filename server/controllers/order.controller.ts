@@ -98,6 +98,7 @@ export const createCheckoutSession = async (req: Request, res: Response): Promis
     }
 };
 
+
 export const createLineItems = (checkoutSessionRequest: CheckoutSessionRequest, menuItems: any[]): any[] => {
     try {
         return checkoutSessionRequest.cartItems.map((cartItem) => {
