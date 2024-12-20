@@ -1,7 +1,7 @@
 import { MailtrapClient } from 'mailtrap'; // ES6 import
 
 export const client = new MailtrapClient({
-  token: process.env.API_TOKEN || "", // Fallback for missing token
+  token: process.env.API_TOKEN || "", 
 });
 
 export const sender = {

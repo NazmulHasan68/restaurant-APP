@@ -2,59 +2,73 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { LoginInputState, userLoginSchema } from "@/schema/userSchema";
+import { useUserStore } from "@/store/useUserStore";
 import { Loader2, LockKeyhole, Mail } from "lucide-react";
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useState, ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 
-
-// typescript me type define krne ka 2 type hotahe 
-
-
 const Login = () => {
-    const [input, setinput] = useState<LoginInputState>({
-        email : "",
-        password : ""
-    })
-    const [erros , setErros] = useState<Partial<LoginInputState>>({})
-    const changeEventHandler = (e:ChangeEvent<HTMLInputElement>) =>{
-        const {name , value} = e.target;
-        setinput({...input, [name]:value})
+  const { login, loading } = useUserStore();
+
+  const [input, setInput] = useState<LoginInputState>({
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState<Partial<LoginInputState>>({});
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  const changeEventHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setInput({ ...input, [name]: value });
+    setErrors({ ...errors, [name]: "" }); // Clear specific error on change
+  };
+
+  const loginSubmitHandler = async (e: FormEvent) => {
+    e.preventDefault();
+    setApiError(null);
+
+    const result = userLoginSchema.safeParse(input);
+    if (!result.success) {
+      const fieldErrors = result.error.formErrors.fieldErrors;
+      setErrors(fieldErrors as Partial<LoginInputState>);
+      return;
     }
-    const loginSubmitHandler = (e:FormEvent)=>{
-        e.preventDefault()
-        const result = userLoginSchema.safeParse(input);
-        if(!result.success){
-            const fieldErrors = result.error.formErrors.fieldErrors
-            setErros(fieldErrors as Partial <LoginInputState>)
-            return
-        }
-        console.log(input);
-        
+
+    try {
+      await login(input); // Call login from the store
+    } catch (error: any) {
+      setApiError(error?.response?.data?.message || "Login failed. Please try again.");
     }
-    const loading = false;
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen w-full">
-      <form onSubmit={loginSubmitHandler} className="md:p-8 w-full md:max-w-md md:border md:border-gray-200 rounded-lg mx-4">
+      <form
+        onSubmit={loginSubmitHandler}
+        className="md:p-8 w-full md:max-w-md md:border md:border-gray-200 rounded-lg mx-4"
+      >
         <div className="mb-4">
           <h1 className="font-bold text-2xl">FoodShadow</h1>
         </div>
+        {apiError && <div className="mb-4 text-red-500 text-sm">{apiError}</div>}
+
         <div className="mb-4">
           <div className="relative">
             <label htmlFor="email" className="sr-only">Email</label>
             <Input
               id="email"
               type="email"
-              name='email'
+              name="email"
               value={input.email}
               onChange={changeEventHandler}
               placeholder="Email"
               className="pl-10 focus:outline-none"
             />
             <Mail className="absolute inset-y-2 left-2 text-gray-500 pointer-events-none" />
-            {erros && <span className="text-red-500 text-xs">{erros.email}</span>}
+            {errors.email && <span className="text-red-500 text-xs">{errors.email}</span>}
           </div>
         </div>
+
         <div className="mb-4">
           <div className="relative">
             <label htmlFor="password" className="sr-only">Password</label>
@@ -68,10 +82,10 @@ const Login = () => {
               className="pl-10 focus:outline-none"
             />
             <LockKeyhole className="absolute inset-y-2 left-2 text-gray-500 pointer-events-none" />
-            {erros && <span className="text-red-500 text-xs">{erros.password}</span>}
-
+            {errors.password && <span className="text-red-500 text-xs">{errors.password}</span>}
           </div>
         </div>
+
         <div className="mb-4">
           <Button
             type="submit"
@@ -85,11 +99,14 @@ const Login = () => {
             )}
           </Button>
           <div className="mt-4 flex justify-end">
-            <Link to="/forgot-password" className="text-blue-500 hover:text-blue-700">Forgot Password</Link>
+            <Link to="/forgot-password" className="text-blue-500 hover:text-blue-700">
+              Forgot Password
+            </Link>
           </div>
         </div>
+
         <Separator />
-        <p className=" mt-2">
+        <p className="mt-2">
           Don't have an account?{" "}
           <Link to="/signup" className="text-blue-500 hover:underline">
             Sign up
