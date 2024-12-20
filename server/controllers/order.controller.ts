@@ -73,7 +73,7 @@ export const createCheckoutSession = async (req: Request, res: Response): Promis
             success_url: `${process.env.FRONTEND_URL}/order/status`,
             cancel_url: `${process.env.FRONTEND_URL}/cart`,
             metadata: {
-                orderId: order._id.toString(),
+                orderId: order.id.toString(),
                 images: JSON.stringify(restaurant.menus.map((item: any) => item.image))
             }
         });
