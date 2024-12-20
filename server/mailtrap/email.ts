@@ -9,24 +9,22 @@ const sendEmail = async (
   to: Recipient[],
   subject: string,
   html: string,
-  category: string,
-  templateVariables?: Record<string, any>
+  category: string
 ): Promise<void> => {
   try {
-    // Using the `send` method to send emails
     await client.send({
       from: sender,
       to,
       subject,
       html,
       category,
-      ...(templateVariables && { templateVariables }),
     });
-  } catch (error) {
-    console.error(`Error sending email: ${subject}`, error);
-    throw new Error(`Failed to send email: ${subject}`);
+  } catch (error: any) {
+    console.error(`Error sending email: ${subject}. Details:`, error.response?.data || error.message);
+    throw new Error(`Failed to send email: ${subject}. Check logs for details.`);
   }
 };
+
 
 // Send Verification Email
 export const sendVerificationEmail = async (
@@ -45,14 +43,10 @@ export const sendWelcomeEmail = async (
   name: string
 ): Promise<void> => {
   const recipients = [{ email }];
-  const html = generateWelcomeEmailHtml(name);
+  const html = generateWelcomeEmailHtml(name); // Ensure this function returns the proper HTML content.
 
-  await sendEmail(recipients, "Welcome to FoodShadow", html, "Welcome Email", {
-    company_info_name: "FoodShadow",
-    name,
-  });
+  await sendEmail(recipients, "Welcome to FoodShadow", html, "Welcome Email");
 };
-
 
 
 // Send Password Reset Email
@@ -66,8 +60,6 @@ export const sendPasswordResetEmail = async (
   await sendEmail(recipients, "Reset your Password", html, "Reset Password");
 };
 
-
-
 // Send Password Reset Success Email
 export const sendResetSuccessEmail = async (email: string): Promise<void> => {
   const recipients = [{ email }];
@@ -80,7 +72,6 @@ export const sendResetSuccessEmail = async (email: string): Promise<void> => {
     "Password Reset Success"
   );
 };
-
 
 
 

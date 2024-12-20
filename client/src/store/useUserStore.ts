@@ -1,3 +1,4 @@
+
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import axios from "axios";
@@ -21,6 +22,7 @@ interface UserState {
   loading: boolean;
   signup: (input: SignupInputState) => Promise<void>;
   login: (input: LoginInputState) => Promise<void>;
+  verifyEmailCode: (verificationCode: string[]) => Promise<void>;
   logout: () => void;
 }
 
@@ -80,6 +82,41 @@ export const useUserStore = create<UserState>()(
         }
       },
 
+      //verigy email implementation
+      verifyEmailCode: async (verificationCode: string[]) => {
+        try {
+          set({ loading: true });
+      
+          const response = await axios.post(
+            `${API_END_POINT}/verify-email`,
+            { verificationCode },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+      
+          if (response.data.success) {
+            set({
+              loading: false,
+              user: response.data.user,
+              isAuthenticated: true,
+            });
+            toast.success(response.data.message);  // Optional: You could display a success message here
+          } else {
+            toast.error("Email verification failed.");
+          }
+        } catch (error: any) {
+          toast.error(
+            error?.response?.data?.message || "Invalid verification credentials."
+          );
+          console.error("Verification error:", error);
+        } finally {
+          set({ loading: false });
+        }
+      },
+      
       // Logout Implementation
       logout: () => {
         set({
