@@ -10,7 +10,7 @@ import { sendPasswordResetEmail, sendResetSuccessEmail, sendVerificationEmail, s
 // SIGNUP CONTROLLER
 export const signup = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { fullname, email, password, contact } = req.body;
+        const { fullname, email, password, contact} = req.body;
 
         // Check if user already exists
         if (await User.findOne({ email })) {
@@ -64,7 +64,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         res.status(200).json({
             success: true,
             message: `Welcome back, ${user.fullname}`,
-            user: { fullname: user.fullname, email: user.email },
+            user: { fullname: user.fullname, email: user.email , isVerified:user.isVerified, admin:user.admin},
         });
     } catch (error) {
         console.error(error);

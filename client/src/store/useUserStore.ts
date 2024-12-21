@@ -4,19 +4,36 @@ import axios from "axios";
 import { LoginInputState, SignupInputState } from "@/schema/userSchema";
 import { toast } from "sonner";
 
-const API_END_POINT = "http://localhost:8000/api/v1/user";
-axios.defaults.withCredentials = true;
+// Environment-based API endpoint configuration
+const API_END_POINT =  "http://localhost:8000/api/v1/user";
+
+// Create an Axios instance for reuse
+const api = axios.create({
+  baseURL: API_END_POINT,
+  withCredentials: true,
+  headers: { "Content-Type": "application/json" },
+});
+
 
 interface User {
   id: string;
   email: string;
-  name: string;
+  fullname: string;
+  address: string;
+  city: string;
+  country: string;
+  profilePicture: string;
+  admin: boolean;
+  isVerified: boolean;
 }
 
 interface UpdateProfileInput {
-  name?: string;
+  fullname?: string;
   email?: string;
-  // Add other updatable fields here
+  address?: string;
+  city?: string;
+  country?: string;
+  profilePicture?: string;
 }
 
 interface UserState {
@@ -34,6 +51,13 @@ interface UserState {
   logout: () => Promise<void>;
 }
 
+// Error handler utility
+const handleError = (error: any, defaultMessage: string) => {
+  toast.error(error?.response?.data?.message || defaultMessage);
+  console.error(error);
+};
+
+// Zustand store
 export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
@@ -45,16 +69,13 @@ export const useUserStore = create<UserState>()(
       signup: async (input) => {
         set({ loading: true });
         try {
-          const { data } = await axios.post(`${API_END_POINT}/signup`, input, {
-            headers: { "Content-Type": "application/json" },
-          });
+          const { data } = await api.post("/signup", input);
           if (data.success) {
             toast.success(data.message);
             set({ user: data.user, isAuthenticated: true });
           }
         } catch (error: any) {
-          toast.error(error?.response?.data?.message || "Signup failed.");
-          console.error("Signup error:", error);
+          handleError(error, "Signup failed.");
         } finally {
           set({ loading: false });
         }
@@ -63,16 +84,13 @@ export const useUserStore = create<UserState>()(
       login: async (input) => {
         set({ loading: true });
         try {
-          const { data } = await axios.post(`${API_END_POINT}/login`, input, {
-            headers: { "Content-Type": "application/json" },
-          });
+          const { data } = await api.post("/login", input);
           if (data.success) {
             toast.success(data.message);
             set({ user: data.user, isAuthenticated: true });
           }
         } catch (error: any) {
-          toast.error(error?.response?.data?.message || "Login failed.");
-          console.error("Login error:", error);
+          handleError(error, "Login failed.");
         } finally {
           set({ loading: false });
         }
@@ -81,18 +99,13 @@ export const useUserStore = create<UserState>()(
       verifyEmailCode: async (verificationCode) => {
         set({ loading: true });
         try {
-          const { data } = await axios.post(
-            `${API_END_POINT}/verify-email`,
-            { verificationCode },
-            { headers: { "Content-Type": "application/json" } }
-          );
+          const { data } = await api.post("/verify-email", { verificationCode });
           if (data.success) {
             set({ user: data.user, isAuthenticated: true });
             toast.success(data.message);
           }
         } catch (error: any) {
-          toast.error(error?.response?.data?.message || "Verification failed.");
-          console.error("Verification error:", error);
+          handleError(error, "Verification failed.");
         } finally {
           set({ loading: false });
         }
@@ -101,7 +114,7 @@ export const useUserStore = create<UserState>()(
       checkAuthentication: async () => {
         set({ isCheckingAuth: true });
         try {
-          const { data } = await axios.get(`${API_END_POINT}/check-auth`);
+          const { data } = await api.get("/check-auth");
           if (data.success) {
             set({ user: data.user, isAuthenticated: true });
           }
@@ -115,17 +128,12 @@ export const useUserStore = create<UserState>()(
       forgotPassword: async (email) => {
         set({ loading: true });
         try {
-          const { data } = await axios.post(
-            `${API_END_POINT}/forgot-password`,
-            { email },
-            { headers: { "Content-Type": "application/json" } }
-          );
+          const { data } = await api.post("/forgot-password", { email });
           if (data.success) {
             toast.success(data.message);
           }
         } catch (error: any) {
-          toast.error(error?.response?.data?.message || "Request failed.");
-          console.error("Forgot password error:", error);
+          handleError(error, "Password reset request failed.");
         } finally {
           set({ loading: false });
         }
@@ -134,17 +142,14 @@ export const useUserStore = create<UserState>()(
       resetPassword: async (token, newPassword) => {
         set({ loading: true });
         try {
-          const { data } = await axios.post(
-            `${API_END_POINT}/reset-password/${token}`,
-            { newPassword },
-            { headers: { "Content-Type": "application/json" } }
-          );
+          const { data } = await api.post(`/reset-password/${token}`, {
+            newPassword,
+          });
           if (data.success) {
             toast.success(data.message);
           }
         } catch (error: any) {
-          toast.error(error?.response?.data?.message || "Reset failed.");
-          console.error("Reset password error:", error);
+          handleError(error, "Reset password failed.");
         } finally {
           set({ loading: false });
         }
@@ -153,18 +158,13 @@ export const useUserStore = create<UserState>()(
       updateProfile: async (input) => {
         set({ loading: true });
         try {
-          const { data } = await axios.put(
-            `${API_END_POINT}/profile/update`,
-            input,
-            { headers: { "Content-Type": "application/json" } }
-          );
+          const { data } = await api.put("/profile/update", input);
           if (data.success) {
             set({ user: data.user, isAuthenticated: true });
             toast.success(data.message);
           }
         } catch (error: any) {
-          toast.error(error?.response?.data?.message || "Update failed.");
-          console.error("Profile update error:", error);
+          handleError(error, "Profile update failed.");
         } finally {
           set({ loading: false });
         }
@@ -173,14 +173,13 @@ export const useUserStore = create<UserState>()(
       logout: async () => {
         set({ loading: true });
         try {
-          const { data } = await axios.post(`${API_END_POINT}/logout`);
+          const { data } = await api.post("/logout");
           if (data.success) {
             toast.success("Logged out successfully.");
             set({ user: null, isAuthenticated: false });
           }
         } catch (error: any) {
-          toast.error(error?.response?.data?.message || "Logout failed.");
-          console.error("Logout error:", error);
+          handleError(error, "Logout failed.");
         } finally {
           set({ loading: false });
         }
@@ -192,3 +191,4 @@ export const useUserStore = create<UserState>()(
     }
   )
 );
+

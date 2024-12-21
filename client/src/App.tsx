@@ -1,96 +1,145 @@
-import './App.css'
-import Login from './auth/Login'
-import {createBrowserRouter, RouterProvider} from 'react-router-dom'
-import Signup from './auth/Signup'
-import ForgotPassword from './auth/ForgotPassword'
-import ResetPassword from './auth/ResetPassword'
-import VerifyEmail from './auth/VerifyEmail'
-import HeroSection from './components/HeroSection'
-import MainLayout from './Layout/MainLayout'
-import Profile from './components/Profile'
-import SearchPage from './components/SearchPage'
-import Restaurant from './components/Restaurant'
-import Cart from './components/Cart'
-import RestaurantAdmin from './admin/Restaurant'
-import AddMenu from './admin/AddMenu'
-import Orders from './admin/Orders'
-import Success from './components/Success'
+import "./App.css";
+import Login from "./auth/Login";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Signup from "./auth/Signup";
+import ForgotPassword from "./auth/ForgotPassword";
+import ResetPassword from "./auth/ResetPassword";
+import VerifyEmail from "./auth/VerifyEmail";
+import HeroSection from "./components/HeroSection";
+import MainLayout from "./Layout/MainLayout";
+import Profile from "./components/Profile";
+import SearchPage from "./components/SearchPage";
+import Restaurant from "./components/Restaurant";
+import Cart from "./components/Cart";
+import RestaurantAdmin from "./admin/Restaurant";
+import AddMenu from "./admin/AddMenu";
+import Orders from "./admin/Orders";
+import Success from "./components/Success";
+import { useUserStore } from "./store/useUserStore";
+import React from "react";
+import { Navigate } from "react-router-dom";
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, user } = useUserStore();
+console.log(user);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  if (!user?.isVerified) {
+    return <Navigate to="/verify-email" replace />;
+  }
+  return children;
+};
+
+const AuthenticatedUser = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, user } = useUserStore();
+  if (isAuthenticated && user?.isVerified) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+};
+
+
+const AdminRoute = ({children}:{children:React.ReactNode})=>{
+  const {user, isAuthenticated} = useUserStore()
+  if(!isAuthenticated){
+    return <Navigate to='/login' replace/>
+  }
+  if(!user?.admin){
+    return <Navigate to='/' replace/>
+  }
+  return children
+}
 
 const appRouter = createBrowserRouter([
   {
-    path : '/',
-    element : <MainLayout/>,
-    children:[
+    path: "/",
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
+    children: [
       {
-        path : "",
-        element : <HeroSection/> 
+        path: "",
+        element: <HeroSection />,
       },
       {
-        path : "/profile",
-        element : <Profile/> 
+        path: "/profile",
+        element: <Profile />,
       },
       {
-        path : "/search/:text",
-        element : <SearchPage/>
+        path: "/search/:text",
+        element: <SearchPage />,
       },
       {
-        path : "/restaurant/:id",
-        element : <Restaurant/>
+        path: "/restaurant/:id",
+        element: <Restaurant />,
       },
       {
-        path : "/cart",
-        element :<Cart/>
+        path: "/cart",
+        element: <Cart />,
       },
       {
-        path : "/order/status",
-        element :<Success/>
+        path: "/order/status",
+        element: <Success />,
+      },
+      //admin services start from here
+      {
+        path: "/admin/restaurant",
+        element: <AdminRoute><RestaurantAdmin /></AdminRoute>,
       },
       {
-        path : "/admin/restaurant",
-        element :<RestaurantAdmin/>
+        path: "/admin/menu",
+        element: <AdminRoute><AddMenu /></AdminRoute>,
       },
       {
-        path : "/admin/menu",
-        element :<AddMenu/>
-      }
-      ,
-      {
-        path : "/admin/orders",
-        element :<Orders/>
-      }
-    ]
+        path: "/admin/orders",
+        element:<AdminRoute><Orders /></AdminRoute>,
+      },
+    ],
+  },
+
+  {
+    path: "/login",
+    element: (
+      <AuthenticatedUser>
+        <Login />
+      </AuthenticatedUser>
+    ),
   },
   {
-    path : '/login',
-    element : <Login/>
+    path: "/signup",
+    element: (
+      <AuthenticatedUser>
+        <Signup />
+      </AuthenticatedUser>
+    ),
   },
   {
-    path : '/signup',
-    element : <Signup/>
+    path: "/forgot-password",
+    element: (
+      <AuthenticatedUser>
+        <ForgotPassword />
+      </AuthenticatedUser>
+    ),
   },
   {
-    path : '/forgot-password',
-    element : <ForgotPassword/>
+    path: "/reset-password",
+    element: <ResetPassword />,
   },
   {
-    path : '/reset-password',
-    element : <ResetPassword/>
-  }
-  ,
-  {
-    path : '/verify-email',
-    element : <VerifyEmail/>
-  }
-])
+    path: "/verify-email",
+    element: <VerifyEmail />,
+  },
+]);
 function App() {
-
   return (
-    <main className=''>
-      <RouterProvider router={appRouter}>
-
-      </RouterProvider>
+    <main className="">
+      <RouterProvider router={appRouter}></RouterProvider>
     </main>
-  )
+  );
 }
 
-export default App
+export default App;
