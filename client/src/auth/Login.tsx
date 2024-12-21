@@ -5,11 +5,11 @@ import { LoginInputState, userLoginSchema } from "@/schema/userSchema";
 import { useUserStore } from "@/store/useUserStore";
 import { Loader2, LockKeyhole, Mail } from "lucide-react";
 import React, { FormEvent, useState, ChangeEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const { login, loading } = useUserStore();
-
+  const {navigate} = useNavigate()
   const [input, setInput] = useState<LoginInputState>({
     email: "",
     password: "",
@@ -36,6 +36,7 @@ const Login = () => {
 
     try {
       await login(input); // Call login from the store
+      navigate('/')
     } catch (error: any) {
       setApiError(error?.response?.data?.message || "Login failed. Please try again.");
     }

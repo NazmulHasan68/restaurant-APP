@@ -5,11 +5,12 @@ import { Separator } from "@/components/ui/separator";
 import { SignupInputState, userSignupSchema } from "@/schema/userSchema";
 import { useUserStore } from "@/store/useUserStore";
 import { Contact, Loader2, LockKeyhole, Mail, Phone, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Signup = () => {
   const { signup, loading } = useUserStore();
 
+  const navigate = useNavigate()
   const [input, setInput] = useState<SignupInputState>({
     fullname: "",
     email: "",
@@ -36,7 +37,12 @@ const Signup = () => {
     }
 
     // Signup API call
-    await signup(input);
+    try {
+      await signup(input);
+      navigate('/verify-email')
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (

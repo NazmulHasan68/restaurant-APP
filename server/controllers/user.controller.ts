@@ -94,10 +94,10 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
 
         await sendWelcomeEmail(user.email, user.fullname);
 
-        res.status(200).json({ success: true, message: "Email verified successfully." });
+        res.status(200).json({ success: true, message: "Email verified successfully." ,isVerified:user.isVerified, admin:user.admin});
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+        res.status(500).json({ success: false, message: "Internal server error"});
     }
 };
 

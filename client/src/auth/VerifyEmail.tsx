@@ -9,7 +9,7 @@ const VerifyEmail = () => {
   const { verifyEmailCode, loading } = useUserStore();
   const [otp, setOpt] = useState<string[]>(["", "", "", "", "", ""]);
   const inputRef = useRef<any>([]);
-
+  const navigate = useNavigate()
   // Handle input changes
   const handleChange = (index: number, value: string) => {
     if (/^[a-zA-Z0-9]+$/.test(value) || value === "") {
@@ -43,7 +43,12 @@ const VerifyEmail = () => {
     }
 
     // Call the verifyEmailCode function with the verification code
-    await verifyEmailCode(verificationCode);
+    try {
+      await verifyEmailCode(verificationCode);
+      navigate('/')
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (

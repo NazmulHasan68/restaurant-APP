@@ -116,7 +116,7 @@ export const useUserStore = create<UserState>()(
         try {
           const { data } = await api.get("/check-auth");
           if (data.success) {
-            set({ user: data.user, isAuthenticated: true });
+            set({ user: data.user, isAuthenticated: true , isCheckingAuth:false });
           }
         } catch (error: any) {
           console.error("Auth check error:", error);

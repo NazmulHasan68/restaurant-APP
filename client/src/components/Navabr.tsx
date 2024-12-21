@@ -26,10 +26,10 @@ import {
   SheetTrigger,
 } from "./ui/sheet";
 import { Separator } from "./ui/separator";
+import { useUserStore } from "@/store/useUserStore";
 
 function Navbar() {
-  const admin = true;
-  const loading = false;
+  const {user, loading, logout} = useUserStore()
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -48,7 +48,7 @@ function Navbar() {
           </div>
 
           {/* Admin Dashboard Links */}
-          {admin && (
+          {user?.admin && (
             <Menubar>
               <MenubarMenu>
                 <MenubarTrigger>Dashboard</MenubarTrigger>
@@ -107,7 +107,7 @@ function Navbar() {
                   Please wait
                 </Button>
               ) : (
-                <Button className=" rounded-xl bg-orange hover:bg-hoverOrange">
+                <Button onClick={logout} className=" rounded-xl bg-orange hover:bg-hoverOrange">
                   Logout
                 </Button>
               )}
@@ -126,7 +126,7 @@ function Navbar() {
 export default Navbar;
 
 const MobileNavbar = () => {
-    const user = true
+  const {user, logout} = useUserStore()
   return (
     <Sheet>
       <SheetTrigger>
@@ -169,18 +169,24 @@ const MobileNavbar = () => {
                 <ShoppingCart/>
                 <span>Cart(0)</span>
             </Link>
-            <Link to='/admin/menu' className="flex items-center gap-4 hover:bg-gray-200 px-3 py-2 rounded-lg cursor-pointer font-medium text-gray-800">
-                <SquareMenu/>
-                <span>Menu</span>
-            </Link>
-            <Link to='/admin/restaurant' className="flex items-center gap-4 hover:bg-gray-200 px-3 py-2 rounded-lg cursor-pointer font-medium text-gray-800">
-                <UtensilsCrossed/>
-                <span>Restaurant</span>
-            </Link>
-            <Link to='/admin/orders' className="flex items-center gap-4 hover:bg-gray-200 px-3 py-2 rounded-lg cursor-pointer font-medium text-gray-800">
-                <PackageCheck/>
-                <span>Restaurant order</span>
-            </Link>
+            {
+              user?.admin && (
+                <>
+                  <Link to='/admin/menu' className="flex items-center gap-4 hover:bg-gray-200 px-3 py-2 rounded-lg cursor-pointer font-medium text-gray-800">
+                    <SquareMenu/>
+                    <span>Menu</span>
+                  </Link>
+                  <Link to='/admin/restaurant' className="flex items-center gap-4 hover:bg-gray-200 px-3 py-2 rounded-lg cursor-pointer font-medium text-gray-800">
+                      <UtensilsCrossed/>
+                      <span>Restaurant</span>
+                  </Link>
+                  <Link to='/admin/orders' className="flex items-center gap-4 hover:bg-gray-200 px-3 py-2 rounded-lg cursor-pointer font-medium text-gray-800">
+                      <PackageCheck/>
+                      <span>Restaurant order</span>
+                  </Link>
+                </>
+              )
+            }
         </SheetDescription>
         <SheetFooter className="flex flex-col items-start  gap-2">
             <div className="flex flex-row items-center gap-2">
@@ -191,7 +197,7 @@ const MobileNavbar = () => {
                 <h1 className="font-bold">Nazmul hasan</h1>
             </div>
             <SheetClose asChild>
-                <Button type="submit" className="bg-orange hover:bg-hoverOrange rounded-xl w-full">Logout</Button>
+                <Button type="submit" onClick={logout} className="bg-orange hover:bg-hoverOrange rounded-xl w-full">Logout</Button>
             </SheetClose>
         </SheetFooter>
       </SheetContent>

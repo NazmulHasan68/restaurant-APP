@@ -16,8 +16,9 @@ import AddMenu from "./admin/AddMenu";
 import Orders from "./admin/Orders";
 import Success from "./components/Success";
 import { useUserStore } from "./store/useUserStore";
-import React from "react";
+import React, { useEffect } from "react";
 import { Navigate } from "react-router-dom";
+import Loading from "./components/ui/Loading";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, user } = useUserStore();
@@ -134,9 +135,22 @@ const appRouter = createBrowserRouter([
     element: <VerifyEmail />,
   },
 ]);
+
 function App() {
+
+  const {checkAuthentication, isCheckingAuth} = useUserStore()
+  console.log(isCheckingAuth);
+
+  useEffect(()=>{
+    checkAuthentication()
+  },[])
+
+  if(isCheckingAuth){
+    return <Loading/>
+  }
   return (
     <main className="">
+
       <RouterProvider router={appRouter}></RouterProvider>
     </main>
   );
