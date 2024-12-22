@@ -1,4 +1,5 @@
-import { MenuItem, RestaurantState } from '@/types/restaurantTypes';
+
+import { MenuItem, RestaurantState, Restaurant } from '@/types/restaurantTypes';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { create } from 'zustand';
@@ -15,7 +16,7 @@ export const useRestaurantStore = create<RestaurantState>()(
       restaurant: null,
       searchResults: null,
       appliedFilter: [],
-
+      singleRestaurant :null,
       createRestaurant: async (formData: FormData) => {
         try {
           set({ loading: true });
@@ -97,8 +98,7 @@ export const useRestaurantStore = create<RestaurantState>()(
           set({ loading: false });
         }
       },
-      
-      
+         
 
       addMenuRestaurant: async (menu:MenuItem) => {
         set((state) => ({
@@ -139,9 +139,19 @@ export const useRestaurantStore = create<RestaurantState>()(
         });
       },
 
-
       setReseliedFilter : () =>{
         set({appliedFilter:[]})
+      },
+
+      getSingleRestaurant : async(restaurantId:string)=>{
+        try {
+          const response = await axios.get(`${API_END_POINT}/${restaurantId}`)
+          if(response.data.success){
+            set({singleRestaurant:response.data.restaurant})
+          }
+        } catch (error:any) {
+          toast.error(error?.response?.data?.message || 'Something went wrong');
+        }
       }
     }),
     {

@@ -131,7 +131,7 @@ const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => (
       </div>
     </CardContent>
     <CardFooter className="p-4 border-t dark:border-t-gray-700 flex justify-end">
-      <Link to={`/restaurant/${restaurant?.id}`}>
+      <Link to={`/restaurant/${restaurant?._id}`}>
         <Button className="bg-orange hover:bg-hoverOrange rounded-full">
           View Menus
         </Button>

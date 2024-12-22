@@ -2,7 +2,9 @@ import image from "@/assets/herroImage.png";
 import { Badge } from "./ui/badge";
 import { Timer } from "lucide-react";
 import AvailableMenu from "./AvailableMenu";
+import { useRestaurantStore } from "@/store/useRestaurant";
 function Restaurant() {
+   const { singleRestaurant} = useRestaurantStore()
   return (
     <div className="max-w-6xl mx-auto my-10">
       <div className="w-full">
@@ -15,9 +17,9 @@ function Restaurant() {
         </div>
         <div className="flex flex-col md:flex-row justify-between ">
           <div className="my-5">
-            <h1 className="font-medium text-xl">Tandori tadka</h1>
+            <h1 className="font-medium text-xl">{singleRestaurant?.restaurantname}</h1>
             <div className="flex gap-2 my-2">
-              {["Biryani", "Momos"].map((cuisine: string, idx: number) => (
+              {singleRestaurant?.cuisines.map((cuisine: string, idx: number) => (
                 <Badge key={idx}>{cuisine}</Badge>
               ))}
             </div>
@@ -27,7 +29,7 @@ function Restaurant() {
                 <h1 className="flex items-center gap-2 font-medium">
                   Delivery Time :{" "}
                 </h1>{" "}
-                <span className="text-[#a8713a]">35 mins</span>
+                <span className="text-[#a8713a]">{singleRestaurant?.deliveryTime} munites</span>
               </div>
             </div>
             <AvailableMenu/>

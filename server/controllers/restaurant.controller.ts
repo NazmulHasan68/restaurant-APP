@@ -266,7 +266,7 @@ export const getSingleRestaurant = async (req: Request, res: Response): Promise<
         // Respond with the restaurant data
         res.status(200).json({
             success: true,
-            data: restaurant,
+            restaurant,
         });
     } catch (error) {
         console.error("Error fetching single restaurant:", error);

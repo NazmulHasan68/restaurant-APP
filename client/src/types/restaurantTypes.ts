@@ -38,5 +38,7 @@ export  type RestaurantState = {
     updateMenuToRestaurant: (updateMenu: MenuItem) => void;
     setAppliedFilter: (value: string) => void;
     setReseliedFilter:()=>void;
+    getSingleRestaurant : (restaurantId:string)=>Promise<void>;
+    singleRestaurant:Restaurant | null
   };
   
