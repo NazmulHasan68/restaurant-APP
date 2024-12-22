@@ -156,7 +156,7 @@ export const useUserStore = create<UserState>()(
       },
 
       updateProfile: async (input) => {
-        set({ loading: true });
+ 
         try {
           const { data } = await api.put("/profile/update", input);
           if (data.success) {

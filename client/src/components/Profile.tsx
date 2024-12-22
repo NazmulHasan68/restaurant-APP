@@ -3,20 +3,23 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import React, { FormEvent, useRef, useState } from "react";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
+import { useUserStore } from "@/store/useUserStore";
 
 function Profile() {
+  const {user, updateProfile} = useUserStore()
+  const [loading , setloading] = useState<boolean>()
   const [profileData, setProfileData] = useState({
-    fullname: "",
-    email:"",
-    address: "",
-    city: "",
-    country: "",
-    profilePicture: "",
+    fullname: user?.fullname || "",
+    email:user?.email || "",
+    address: user?.address || "",
+    city: user?.city || "",
+    country: user?.country || "",
+    profilePicture: user?.profilePicture || "",
   });
 
   const imageRef = useRef<HTMLInputElement | null>(null);
   const [selectedProfilePicture, setSelectedProfilePicture] =
-    useState<string>("");
+    useState<string>(profileData.profilePicture || "");
   const fileChageHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -34,13 +37,22 @@ function Profile() {
     const { name, value } = e.target;
     setProfileData({ ...profileData, [name]: value });
   };
-  const updateProfileHandler = (e: FormEvent<HTMLFormElement>) => {
+  const updateProfileHandler = async(e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(profileData);
     //update profile api implementation
+    try {
+      setloading(true)
+      await updateProfile(profileData)
+      setloading(false)
+    } catch (error) {
+      setloading(false)
+    }
+
+   
   };
 
-  const loading= false
+
   return (
     <form onSubmit={updateProfileHandler} className="max-w-7xl mx-auto my-5">
       <div className="flex items-center justify-between">
@@ -77,6 +89,7 @@ function Profile() {
           <div className="w-full">
             <Label>Email</Label>
             <input
+              disabled
               type="text"
               name='email'
               value={profileData.email}
@@ -124,6 +137,7 @@ function Profile() {
             />
           </div>
         </div>
+      </div>
         <div className="mx-auto">
         {
             loading ? (
@@ -133,7 +147,6 @@ function Profile() {
             )
         }
         </div>
-      </div>
     </form>
   );
 }
