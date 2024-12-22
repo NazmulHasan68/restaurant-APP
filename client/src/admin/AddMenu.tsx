@@ -16,13 +16,14 @@ import { useState } from "react";
 import EditMenu from "./EditMenu";
 import { MenuFormSchema, menuSchema } from "@/schema/menuSchema";
 import { useMenuStore } from "@/store/useMenuStore";
+import { useRestaurantStore } from "@/store/useRestaurant";
 
 export default function AddMenu() {
   const [open, setOpen] = useState<boolean>(false); // Dialog state
   // const [loading, setLoading] = useState(false);
   const {loading, createMenu} = useMenuStore()
   const [errors, setErrors] = useState<Partial<MenuFormSchema>>({})
-
+  const {restaurant} = useRestaurantStore()
   const [menuInput, setMenuInput] = useState<MenuFormSchema>({
     name: "",
     description: "",
@@ -74,21 +75,7 @@ export default function AddMenu() {
     }
   };
 
-  //demo menu
-  const menus = [
-    {
-      name: "Birynani",
-      image: Image,
-      description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. ",
-      price: 800,
-    },
-    {
-      name: "Birynani",
-      image: Image,
-      description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. ",
-      price: 100,
-    },
-  ];
+ 
 
   const [editOpen ,setEditopen] = useState<boolean>(false)
 
@@ -194,19 +181,19 @@ export default function AddMenu() {
         </Dialog>
       </div>
 
-      {menus.map((menu: any, idx: number) => (
+      {restaurant?.menus.map((menu: any, idx: number) => (
         <div key={idx} className="mt-6 space-y-4 ">
           <div className="flex flex-col md:flex-row md:items-center md:space-x-4 md:p-4 p-2 shadow-md rounded-lg">
             <img
               src={menu.image}
               alt="menu image"
-              className="md:h-24 md:w-24 h-16 w-full object-cover rounded-xl"
+              className="md:h-24 md:w-24 h-28 w-full object-cover rounded-xl"
             />
             <div className="flex-1">
               <h1 className="text-lg font-semibold text-gray-800">
                 {menu.name}
               </h1>
-              <p className="text-sm text-gray-500 mt-1">{menu.description}</p>
+              <p className="text-sm text-gray-500 mt-1 line-clamp-2 w-[90%] my-2">{menu.description}</p>
               <h2 className="text-md font-semibold">
                 Price : <span className="text-[#D19254]">{menu.price}</span>
               </h2>

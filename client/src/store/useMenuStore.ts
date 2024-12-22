@@ -2,6 +2,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {create} from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
+import { useRestaurantStore } from './useRestaurant';
 
 const API_END_POINT = 'http://localhost:8000/api/v1/menu'
 axios.defaults.withCredentials = true
@@ -27,11 +28,16 @@ export const useMenuStore = create<MenuState>()(persist(
                 toast.success(response.data.message)
                 set({loading:false, menu:response.data.menu})
             }
+
+            //update resturant (real time)
+            useRestaurantStore.getState().addMenuRestaurant(response.data.menu)
+
            } catch (error:any) {
             toast.error(error.response.data.message)
             set({loading:false})
            }
         },
+
         editMenu : async(menuId:string, formData:FormData) =>{
             try {
                 set({loading:true})
@@ -45,6 +51,8 @@ export const useMenuStore = create<MenuState>()(persist(
                     set({loading:false, menu:response.data.menu})
                 }
 
+                //update restuarant menu 
+                useRestaurantStore.getState().updateMenuToRestaurant(response.data.menu)
             } catch (error:any) {
                 toast.error(error.response.data.message)
                 set({loading:false})

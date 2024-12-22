@@ -6,10 +6,25 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 const API_END_POINT = 'http://localhost:8000/api/v1/restaurant';
 axios.defaults.withCredentials = true;
 
+// Define types
+type MenuItem = {
+  _id: string;
+  name: string;
+  description?: string;
+  price?: number;
+};
+
+type Restaurant = {
+  id: string;
+  name: string;
+  menus: MenuItem[];
+  // Add other restaurant fields as needed
+};
+
 type RestaurantState = {
   loading: boolean;
-  restaurant: any | null;
-  searchResults: any[] | null;
+  restaurant: Restaurant | null;
+  searchResults: Restaurant[] | null;
   createRestaurant: (formData: FormData) => Promise<void>;
   getRestaurant: () => Promise<void>;
   updateRestaurant: (formData: FormData) => Promise<void>;
@@ -18,6 +33,8 @@ type RestaurantState = {
     searchQuery: string,
     selectedCuisines: string
   ) => Promise<void>;
+  addMenuRestaurant: (menu: any) => Promise<void>;
+  updateMenuToRestaurant: (updateMenu: any) => void;
 };
 
 export const useRestaurantStore = create<RestaurantState>()(
@@ -52,7 +69,7 @@ export const useRestaurantStore = create<RestaurantState>()(
           set({ loading: true });
           const response = await axios.get(`${API_END_POINT}`);
           if (response.data.success) {
-            set({ loading: false, restaurant: response.data.restaurant});
+            set({ restaurant: response.data.restaurant });
           }
         } catch (error: any) {
           if (error?.response?.status === 404) {
@@ -96,14 +113,44 @@ export const useRestaurantStore = create<RestaurantState>()(
           );
 
           if (response.data.success) {
-            console.log(response.data);
-            set({ loading: false, searchResults: response.data.data });
+            set({ searchResults: response.data.data });
           }
-        } catch (error :any) {
-          toast.error(error?.response?.data?.message || 'search Restaurant failed');
+        } catch (error: any) {
+          toast.error(error?.response?.data?.message || 'Search failed');
         } finally {
           set({ loading: false });
         }
+      },
+
+      // Add a menu to the restaurant
+      addMenuRestaurant: async (menu: any) => {
+        set((state) => ({
+          restaurant: state.restaurant
+            ? {
+                ...state.restaurant,
+                menus: [...(state.restaurant.menus || []), menu],
+              }
+            : null,
+        }));
+      },
+
+      // Update an existing menu in the restaurant
+      updateMenuToRestaurant: (updateMenu: any) => {
+        set((state) => {
+          if (state.restaurant) {
+            const updatedMenus = state.restaurant.menus.map((menu) =>
+              menu._id === updateMenu._id ? updateMenu : menu
+            );
+
+            return {
+              restaurant: {
+                ...state.restaurant,
+                menus: updatedMenus,
+              },
+            };
+          }
+          return state; 
+        });
       },
     }),
     {

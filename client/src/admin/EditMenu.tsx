@@ -8,10 +8,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MenuFormSchema } from "@/schema/menuSchema";
+import { MenuFormSchema, menuSchema } from "@/schema/menuSchema";
+import { useMenuStore } from "@/store/useMenuStore";
 import { Dialog } from "@radix-ui/react-dialog";
 import { Loader2 } from "lucide-react";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, FormEvent, SetStateAction, useEffect, useState } from "react";
 
 function EditMenu({
   selectedMenu,
@@ -28,19 +29,8 @@ function EditMenu({
     price: 0,
     image: undefined as File | undefined,
   });
-
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (selectedMenu) {
-      setMenuInput({
-        name: selectedMenu?.name || "",
-        description: selectedMenu?.description || "",
-        price: selectedMenu?.price || "",
-        image: selectedMenu?.image || undefined,
-      });
-    }
-  }, [selectedMenu]);
+  const [errors, setErrors] = useState<Partial<MenuFormSchema>>({});
+  const { loading, editMenu } = useMenuStore();
 
   const changeMenuHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
@@ -48,23 +38,42 @@ function EditMenu({
       ...prev,
       [name]: type === "file" ? e.target.files?.[0] || undefined : value,
     }));
+    setErrors((prev) => ({ ...prev, [name]: undefined })); // Reset errors for the field
   };
 
-  const handleSubmit = async () => {
-  
-    setLoading(true);
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const result = menuSchema.safeParse(menuInput);
+    if (!result.success) {
+      const fieldErrors = result.error.formErrors.fieldErrors;
+      setErrors(fieldErrors as Partial<MenuFormSchema>);
+      return;
+    }
 
-    console.log(menuInput);
-    
     try {
-      alert("Menu updated successfully!");
-      setEditopen(false);
+      const formData = new FormData();
+      formData.append("name", menuInput.name);
+      formData.append("description", menuInput.description);
+      formData.append("price", menuInput.price.toString());
+      if (menuInput.image) {
+        formData.append("image", menuInput.image);
+      }
+      await editMenu(selectedMenu._id, formData);
     } catch (error) {
-      alert("Failed to update menu.");
-    } finally {
-      setLoading(false);
+      console.error("Error editing menu:", error);
     }
   };
+
+  useEffect(() => {
+    if (selectedMenu) {
+      setMenuInput({
+        name: selectedMenu?.name || "",
+        description: selectedMenu?.description || "",
+        price: selectedMenu?.price || 0,
+        image: undefined, // Ensure no file is preselected
+      });
+    }
+  }, [selectedMenu]);
 
   return (
     <Dialog open={editOpen} onOpenChange={setEditopen}>
@@ -75,12 +84,7 @@ function EditMenu({
             Update your menu to keep your offerings fresh and exciting.
           </DialogDescription>
         </DialogHeader>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSubmit();
-          }}
-        >
+        <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <Label htmlFor="name">Name</Label>
@@ -92,6 +96,11 @@ function EditMenu({
                 value={menuInput.name}
                 onChange={changeMenuHandler}
               />
+              {errors.name && (
+                <span className="text-xs font-medium text-red-500">
+                  {errors.name}
+                </span>
+              )}
             </div>
 
             <div>
@@ -104,18 +113,28 @@ function EditMenu({
                 value={menuInput.description}
                 onChange={changeMenuHandler}
               />
+              {errors.description && (
+                <span className="text-xs font-medium text-red-500">
+                  {errors.description}
+                </span>
+              )}
             </div>
 
             <div>
               <Label htmlFor="price">Price in Taka</Label>
               <Input
                 id="price"
-                type="text"
+                type="number"
                 name="price"
                 placeholder="Enter menu price"
                 value={menuInput.price}
                 onChange={changeMenuHandler}
               />
+              {errors.price && (
+                <span className="text-xs font-medium text-red-500">
+                  {errors.price}
+                </span>
+              )}
             </div>
 
             <div>
@@ -123,21 +142,28 @@ function EditMenu({
               <Input
                 id="imageFile"
                 type="file"
-                name="imageFile"
+                name="image"
                 accept="image/*"
                 onChange={changeMenuHandler}
               />
+           
             </div>
           </div>
 
           <DialogFooter className="mt-5">
             {loading ? (
-              <Button disabled className="bg-orange hover:bg-hoverOrange rounded-xl mt-2">
+              <Button
+                disabled
+                className="bg-orange hover:bg-hoverOrange rounded-xl mt-2"
+              >
                 <Loader2 className="mr-2 w-4 h-4 animate-spin" />
                 Please wait
               </Button>
             ) : (
-              <Button type="submit" className="bg-orange hover:bg-hoverOrange rounded-xl mt-2">
+              <Button
+                type="submit"
+                className="bg-orange hover:bg-hoverOrange rounded-xl mt-2"
+              >
                 Submit
               </Button>
             )}
