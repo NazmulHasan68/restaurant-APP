@@ -5,7 +5,7 @@ import uploadImageOncloudinary from "../utils/ImageUpload";
 
 export const createRestaurant = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { restaurantName, city, country, price, deliveryTime, cuisines } = req.body;
+        const { restaurantname, city, country, deliveryTime, cuisines } = req.body;  
         const file = req.file;
 
         // Check if the restaurant already exists for the user
@@ -31,10 +31,9 @@ export const createRestaurant = async (req: Request, res: Response): Promise<voi
         // Create and save the new restaurant
         const newRestaurant = new Restaurant({
             user: req.id,
-            restaurantName,
+            restaurantname,
             city,
             country,
-            price,
             deliveryTime,
             cuisines: JSON.parse(cuisines), // Parse cuisines if it's sent as a stringified JSON
             imageUrl,
@@ -87,7 +86,7 @@ export const getRestaurant = async (req: Request, res: Response): Promise<void> 
 
 export const updateRestaurant = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { restaurantName, city, country, deliveryTime, cuisines } = req.body;
+        const { restaurantname, city, country, deliveryTime, cuisines } = req.body;
         const file = req.file;
 
         // Find the restaurant for the authenticated user
@@ -102,7 +101,7 @@ export const updateRestaurant = async (req: Request, res: Response): Promise<voi
         }
 
         // Update restaurant fields if provided in the request
-        if (restaurantName) restaurant.restaurantName = restaurantName;
+        if (restaurantname) restaurant.restaurantname = restaurantname;
         if (city) restaurant.city = city;
         if (country) restaurant.country = country;
         if (deliveryTime) restaurant.deliveryTime = deliveryTime;
@@ -207,7 +206,7 @@ export const searchRestaurant = async (req: Request, res: Response): Promise<voi
         // Basic search based on searchText (restaurant name, city, country)
         if (searchText) {
             query.$or = [
-                { restaurantName: { $regex: searchText, $options: "i" } },
+                { restaurantname: { $regex: searchText, $options: "i" } },
                 { city: { $regex: searchText, $options: "i" } },
                 { country: { $regex: searchText, $options: "i" } },
             ];
@@ -217,7 +216,7 @@ export const searchRestaurant = async (req: Request, res: Response): Promise<voi
         if (searchQuery) {
             query.$or = query.$or || [];
             query.$or.push(
-                { restaurantName: { $regex: searchQuery, $options: "i" } },
+                { restaurantname: { $regex: searchQuery, $options: "i" } },
                 { cuisines: { $regex: searchQuery, $options: "i" } }
             );
         }

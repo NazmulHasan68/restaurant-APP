@@ -1,7 +1,7 @@
 import {z} from 'zod'
 
 export const restaurantFromSchema = z.object({
-    restuarantname:z.string().nonempty({message : "Restaurnat Name is required"}),
+    restaurantname:z.string().nonempty({message : "Restaurnat Name is required"}),
     city:z.string().nonempty({message: "City is required!"}),
     country : z.string().nonempty({message:"country is required!"}),
     deliveryTime : z.number().min(0, {message:"Delivery time can not be negative"}),

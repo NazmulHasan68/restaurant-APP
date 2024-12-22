@@ -5,15 +5,16 @@ import {
   restaurantFromSchema,
   RestaurantFromSchema,
 } from "@/schema/restaurantSchema";
+import { useRestaurantStore } from "@/store/useRestaurant";
 import { Loader2 } from "lucide-react";
 import React, { FormEvent, useState } from "react";
 
 function RestaurantAdmin() {
-  const loading = false;
-  const restuaranthai = true;
+  const { loading, restaurant, updateRestaurant, createRestaurant } =
+    useRestaurantStore();
 
   const [input, setinput] = useState<RestaurantFromSchema>({
-    restuarantname: "",
+    restaurantname: "",
     city: "",
     country: "",
     deliveryTime: 0,
@@ -31,7 +32,7 @@ function RestaurantAdmin() {
 
   const [errors, setErrors] = useState<Partial<RestaurantFromSchema>>();
 
-  const submithandler = (e: FormEvent<HTMLFormElement>) => {
+  const submithandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const result = restaurantFromSchema.safeParse(input);
     if (!result.success) {
@@ -39,10 +40,37 @@ function RestaurantAdmin() {
       setErrors(fieldErrors as Partial<RestaurantFromSchema>);
       return;
     }
-    console.log(input);
-
-    // add restaurant api implementation start from here
+  
+    try {
+      const formData = new FormData();
+      formData.append("restaurantname", input.restaurantname);
+      formData.append("city", input.city);
+      formData.append("country", input.country);
+      formData.append("deliveryTime", input.deliveryTime.toString());
+      formData.append("cuisines", JSON.stringify(input.cuisines));
+      if (input.imageFile) {
+        formData.append("imageFile", input.imageFile);
+      }
+  
+      // Debugging FormData
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+  
+      if (restaurant) {
+        // Update
+        await updateRestaurant(formData);
+      } else {
+        // Create
+        await createRestaurant(formData);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
+
+  
+  
 
   return (
     <div className="max-w-5xl mx-auto my-10 px-4">
@@ -56,14 +84,14 @@ function RestaurantAdmin() {
                 <Label>Restaurant Name</Label>
                 <Input
                   type="text"
-                  name="restuarantname"
-                  value={input.restuarantname}
+                  name="restaurantname"
+                  value={input.restaurantname}
                   onChange={changeEventHandler}
                   placeholder="Enter your restaurant name"
                 />
                 {errors && (
                   <span className="text-xs text-red-500 font-medium">
-                    {errors.restuarantname}
+                    {errors.restaurantname}
                   </span>
                 )}
               </div>
@@ -165,7 +193,7 @@ function RestaurantAdmin() {
                   </Button>
                 ) : (
                   <Button className=" bg-orange hover:bg-hoverOrange rounded-xl">
-                    {restuaranthai
+                    {restaurant
                       ? "Update Your Restaurant"
                       : "Add Your Restaurant"}
                   </Button>
