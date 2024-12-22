@@ -238,7 +238,7 @@ export const searchRestaurant = async (req: Request, res: Response): Promise<voi
         console.error("Error searching restaurants:", error);
         res.status(500).json({
             success: false,
-            message: "Internal server error",
+            message: "Internal server error", // Include the error message for debugging
         });
     }
 };

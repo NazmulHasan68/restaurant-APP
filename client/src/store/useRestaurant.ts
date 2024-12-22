@@ -1,3 +1,4 @@
+import { MenuItem, RestaurantState } from '@/types/restaurantTypes';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { create } from 'zustand';
@@ -6,36 +7,6 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 const API_END_POINT = 'http://localhost:8000/api/v1/restaurant';
 axios.defaults.withCredentials = true;
 
-// Define types
-type MenuItem = {
-  _id: string;
-  name: string;
-  description?: string;
-  price?: number;
-};
-
-type Restaurant = {
-  id: string;
-  name: string;
-  menus: MenuItem[];
-  // Add other restaurant fields as needed
-};
-
-type RestaurantState = {
-  loading: boolean;
-  restaurant: Restaurant | null;
-  searchResults: Restaurant[] | null;
-  createRestaurant: (formData: FormData) => Promise<void>;
-  getRestaurant: () => Promise<void>;
-  updateRestaurant: (formData: FormData) => Promise<void>;
-  searchRestaurant: (
-    searchText: string,
-    searchQuery: string,
-    selectedCuisines: string
-  ) => Promise<void>;
-  addMenuRestaurant: (menu: any) => Promise<void>;
-  updateMenuToRestaurant: (updateMenu: any) => void;
-};
 
 export const useRestaurantStore = create<RestaurantState>()(
   persist(
@@ -43,8 +14,8 @@ export const useRestaurantStore = create<RestaurantState>()(
       loading: false,
       restaurant: null,
       searchResults: null,
+      appliedFilter: [],
 
-      // Create a new restaurant
       createRestaurant: async (formData: FormData) => {
         try {
           set({ loading: true });
@@ -63,7 +34,6 @@ export const useRestaurantStore = create<RestaurantState>()(
         }
       },
 
-      // Get restaurants
       getRestaurant: async () => {
         try {
           set({ loading: true });
@@ -81,7 +51,6 @@ export const useRestaurantStore = create<RestaurantState>()(
         }
       },
 
-      // Update a restaurant
       updateRestaurant: async (formData: FormData) => {
         try {
           set({ loading: true });
@@ -100,42 +69,49 @@ export const useRestaurantStore = create<RestaurantState>()(
         }
       },
 
-      // Search restaurants
-      searchRestaurant: async (searchText: string, searchQuery: string, selectedCuisines: string) => {
+      searchRestaurant: async (searchText, searchQuery, selectedCuisines) => {
+        if (!searchText || !searchQuery) {
+          console.error("Invalid search parameters.");
+          return;
+        }
+      
         try {
           set({ loading: true });
           const params = new URLSearchParams();
-          params.set('searchQuery', searchQuery);
-          params.set('selectedCuisines', selectedCuisines);
-
+          if (searchQuery) params.set("searchQuery", searchQuery);
+          if (selectedCuisines.length > 0) params.set("selectedCuisines", selectedCuisines.join(","));
+      
           const response = await axios.get(
             `${API_END_POINT}/search/${searchText}?${params.toString()}`
           );
-
+      
           if (response.data.success) {
-            set({ searchResults: response.data.data });
+            set({ searchResults: response.data });
+          } else {
+            toast.error(response.data.message || "Search failed");
           }
         } catch (error: any) {
-          toast.error(error?.response?.data?.message || 'Search failed');
+          console.error("Search Error:", error);
+          toast.error(error?.response?.data?.message || "Search failed");
         } finally {
           set({ loading: false });
         }
       },
+      
+      
 
-      // Add a menu to the restaurant
-      addMenuRestaurant: async (menu: any) => {
+      addMenuRestaurant: async (menu:MenuItem) => {
         set((state) => ({
           restaurant: state.restaurant
             ? {
                 ...state.restaurant,
-                menus: [...(state.restaurant.menus || []), menu],
+                menus: [...state.restaurant.menus, menu],
               }
             : null,
         }));
       },
 
-      // Update an existing menu in the restaurant
-      updateMenuToRestaurant: (updateMenu: any) => {
+      updateMenuToRestaurant: (updateMenu:MenuItem) => {
         set((state) => {
           if (state.restaurant) {
             const updatedMenus = state.restaurant.menus.map((menu) =>
@@ -149,9 +125,24 @@ export const useRestaurantStore = create<RestaurantState>()(
               },
             };
           }
-          return state; 
+          return state;
         });
       },
+
+      setAppliedFilter: (value) => {
+        set((state) => {
+          const isAlreadyApplied = state.appliedFilter.includes(value);
+          const updatedFilter = isAlreadyApplied
+            ? state.appliedFilter.filter((item) => item !== value)
+            : [...state.appliedFilter, value];
+          return { appliedFilter: updatedFilter };
+        });
+      },
+
+
+      setReseliedFilter : () =>{
+        set({appliedFilter:[]})
+      }
     }),
     {
       name: 'restaurant-store',
