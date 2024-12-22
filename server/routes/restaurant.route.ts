@@ -5,7 +5,7 @@ import upload from '../utils/multer';
 const router = express.Router()
 
 router.route("/").post(isAuthenticated, upload.single("imageFile"), createRestaurant)
-router.route("/").post(isAuthenticated, getRestaurant)
+router.route("/").get(isAuthenticated, getRestaurant)
 router.route("/").put(isAuthenticated, upload.single("imageFile"), updateRestaurant)
 router.route("/order").get(isAuthenticated, getRestaurantOrder)
 router.route("/order/:orderId/status").put(isAuthenticated, getRestaurantOrder)

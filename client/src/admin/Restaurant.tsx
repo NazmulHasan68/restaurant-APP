@@ -7,10 +7,10 @@ import {
 } from "@/schema/restaurantSchema";
 import { useRestaurantStore } from "@/store/useRestaurant";
 import { Loader2 } from "lucide-react";
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useEffect, useState } from "react";
 
 function RestaurantAdmin() {
-  const { loading, restaurant, updateRestaurant, createRestaurant } =
+  const { loading, restaurant, updateRestaurant, createRestaurant, getRestaurant } =
     useRestaurantStore();
 
   const [input, setinput] = useState<RestaurantFromSchema>({
@@ -69,9 +69,21 @@ function RestaurantAdmin() {
     }
   };
 
-  
-  
+  useEffect(()=>{
+    const fetchRestuarnt = async()=>{
+      await getRestaurant()
+      setinput({
+        restaurantname:restaurant?.restaurantname || "",
+        city: restaurant.city ||"",
+        country:restaurant.country || "",
+        deliveryTime: restaurant.deliveryTime || 0,
+        cuisines: restaurant.cuisines ? restaurant.cuisines.map((cuisine:string) => cuisine) : [],
+        imageFile: undefined,
+      })
+    }
+    fetchRestuarnt()
 
+  },[])
   return (
     <div className="max-w-5xl mx-auto my-10 px-4">
       <div>

@@ -52,7 +52,7 @@ export const useRestaurantStore = create<RestaurantState>()(
           set({ loading: true });
           const response = await axios.get(`${API_END_POINT}`);
           if (response.data.success) {
-            set({ loading: false, restaurant: response.data.restaurants });
+            set({ loading: false, restaurant: response.data.restaurant});
           }
         } catch (error: any) {
           if (error?.response?.status === 404) {

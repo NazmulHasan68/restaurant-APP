@@ -7,7 +7,6 @@ export const createRestaurant = async (req: Request, res: Response): Promise<voi
     try {
         const { restaurantname, city, country, deliveryTime, cuisines } = req.body;  
         const file = req.file;
-
         // Check if the restaurant already exists for the user
         const existingRestaurant = await Restaurant.findOne({ user: req.id });
         if (existingRestaurant) {
@@ -60,10 +59,10 @@ export const createRestaurant = async (req: Request, res: Response): Promise<voi
 export const getRestaurant = async (req: Request, res: Response): Promise<void> => {
     try {
         // Fetch restaurants for the authenticated user
-        const restaurants = await Restaurant.find({ user: req.id });
+        const restaurant = await Restaurant.findOne({ user: req.id });
 
         // Check if restaurants exist
-        if (!restaurants || restaurants.length === 0) {
+        if (!restaurant) {
             res.status(404).json({
                 success: false,
                 message: "No restaurants found for this user!",
@@ -72,7 +71,7 @@ export const getRestaurant = async (req: Request, res: Response): Promise<void> 
         }
         res.status(200).json({
             success: true,
-            restaurants,
+            restaurant,
         });
     } catch (error) {
         console.error("Error fetching restaurants:", error);

@@ -22,7 +22,6 @@ import Loading from "./components/ui/Loading";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, user } = useUserStore();
-console.log(user);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -139,7 +138,6 @@ const appRouter = createBrowserRouter([
 function App() {
 
   const {checkAuthentication, isCheckingAuth} = useUserStore()
-  console.log(isCheckingAuth);
 
   useEffect(()=>{
     checkAuthentication()
