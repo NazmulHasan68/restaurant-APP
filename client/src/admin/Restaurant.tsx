@@ -82,7 +82,8 @@ function RestaurantAdmin() {
       })
     }
     fetchRestuarnt()
-
+    console.log(restaurant);
+    
   },[])
   return (
     <div className="max-w-5xl mx-auto my-10 px-4">

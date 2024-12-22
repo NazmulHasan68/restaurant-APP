@@ -59,12 +59,13 @@ export const createRestaurant = async (req: Request, res: Response): Promise<voi
 export const getRestaurant = async (req: Request, res: Response): Promise<void> => {
     try {
         // Fetch restaurants for the authenticated user
-        const restaurant = await Restaurant.findOne({ user: req.id });
+        const restaurant = await Restaurant.findOne({ user: req.id }).populate('menus')
 
         // Check if restaurants exist
         if (!restaurant) {
             res.status(404).json({
                 success: false,
+                restaurant:[],
                 message: "No restaurants found for this user!",
             });
             return;
