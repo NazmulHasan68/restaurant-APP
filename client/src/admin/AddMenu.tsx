@@ -15,10 +15,12 @@ import { Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import EditMenu from "./EditMenu";
 import { MenuFormSchema, menuSchema } from "@/schema/menuSchema";
+import { useMenuStore } from "@/store/useMenuStore";
 
 export default function AddMenu() {
   const [open, setOpen] = useState<boolean>(false); // Dialog state
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
+  const {loading, createMenu} = useMenuStore()
   const [errors, setErrors] = useState<Partial<MenuFormSchema>>({})
 
   const [menuInput, setMenuInput] = useState<MenuFormSchema>({
@@ -34,38 +36,41 @@ export default function AddMenu() {
 
   const changeMenuHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
+  
     setMenuInput((prev) => ({
       ...prev,
-      [name]: type === "file" 
-        ? e.target.files?.[0] 
-        : name === "price" 
-        ? (value === "" ? 0 : parseFloat(value)) 
-        : value,
+      [name]:name === "price"
+            ? value === "" 
+            ? 0 
+            : parseFloat(value) 
+            : type === "file"
+            ? e.target.files?.[0]
+            : value,
     }));
   };
+  
 
-  const handleSubmit = async () => {
- 
+  const handleSubmit = async() => {
     const result = menuSchema.safeParse(menuInput);
     if(!result.success){
         const fieldErrors =  result.error.formErrors.fieldErrors
         setErrors(fieldErrors as Partial<MenuFormSchema>)
         return
     }
-
-     
+    // api start from Here
     try {
-      setMenuInput({
-        name: "",
-        description: "",
-        price: 0,
-        image: undefined,
-      });
-      setOpen(false); 
+      const formData = new FormData()
+      formData.append('name', menuInput.name)
+      formData.append('description', menuInput.description)
+      formData.append('price', menuInput.price.toString())
+      if(menuInput.image){
+        formData.append('image', menuInput.image)
+      }
+      console.log(menuInput.image);
+      
+      await createMenu(formData)
     } catch (error) {
-    //   alert("Failed to add menu.");
-    } finally {
-      setLoading(false);
+      console.log(error);
     }
   };
 
@@ -76,12 +81,6 @@ export default function AddMenu() {
       image: Image,
       description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. ",
       price: 800,
-    },
-    {
-      name: "Birynani",
-      image: Image,
-      description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. ",
-      price: 100,
     },
     {
       name: "Birynani",
@@ -163,11 +162,11 @@ export default function AddMenu() {
                     <Label>Upload Menu Image</Label>
                     <Input
                       type="file"
-                      name="imageFile"
+                      name="image"
                       accept="image/*"
                       onChange={changeMenuHandler}
                     />
-                     {errors && <span className="text-xs font-medium text-red-500">{errors.image?.name|| "Image is required"}</span>}
+                     {errors && <span className="text-xs font-medium text-red-500">{errors.image?.name}</span>}
                   </div>
                 </div>
 

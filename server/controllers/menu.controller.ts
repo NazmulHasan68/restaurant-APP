@@ -6,9 +6,8 @@ import mongoose from "mongoose";
 
 export const Addmenu = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { name, description, price, restaurantId } = req.body; // Include restaurantId from the client
-        const file = req.file;
-
+        const { name, description, price } = req.body; 
+        const file = req.file; 
         // Validate the file (image) input
         if (!file) {
             res.status(400).json({
@@ -17,11 +16,10 @@ export const Addmenu = async (req: Request, res: Response): Promise<void> => {
             });
             return; 
         }
-
         const imageUrl = await uploadImageOncloudinary(file as Express.Multer.File);
 
         // Check if the restaurant exists
-        const restaurant = await Restaurant.findById(restaurantId);
+        const restaurant = await Restaurant.findOne({user:req.id});
         if (!restaurant) {
             res.status(404).json({
                 success: false,
@@ -34,7 +32,7 @@ export const Addmenu = async (req: Request, res: Response): Promise<void> => {
             description,
             price,
             image: imageUrl,
-            restaurant: restaurant._id, // Add restaurant reference to menu
+            restaurant: restaurant._id, 
         });
 
         // Add the menu to the restaurant's menus array
