@@ -162,36 +162,6 @@ export const getRestaurantOrder = async (req: Request, res: Response): Promise<v
 };
 
 
-export const updateOrderStatus = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const { orderId } = req.params;
-        const { status } = req.body; 
-
-        const order = await Order.findById(orderId);
-        if (!order) {
-            res.status(404).json({
-                success: false,
-                message: "Order not found!",
-            });
-            return;
-        }
-        order.status = status;
-        await order.save();
-
-        res.status(200).json({
-            success: true,
-            message: "Status updated successfully!",
-            order, 
-        });
-    } catch (error) {
-        console.error("Error updating order status:", error);
-        res.status(500).json({
-            success: false,
-            message: "Internal server error",
-        });
-    }
-};
-
 
 export const searchRestaurant = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -276,3 +246,38 @@ export const getSingleRestaurant = async (req: Request, res: Response): Promise<
         });
     }
 };
+
+
+
+export const updateOrderStatus = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { orderId } = req.params;
+      const { status } = req.body;
+
+      // Find the order by ID
+      const order = await Order.findById(orderId);
+      if (!order) {
+        res.status(404).json({
+          success: false,
+          message: "Order not found!",
+        });
+        return;
+      }
+  
+      // Update the order's status and save
+      order.status = status;
+      await order.save();
+  
+      res.status(200).json({
+        success: true,
+        message: "Status updated successfully!",
+        status: order.status, 
+      });
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  };

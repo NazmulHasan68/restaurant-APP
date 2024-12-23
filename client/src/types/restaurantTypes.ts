@@ -1,3 +1,4 @@
+import { Orders } from "./orderTypes";
 
 // Define types
 export type MenuItem = {
@@ -39,6 +40,9 @@ export  type RestaurantState = {
     setAppliedFilter: (value: string) => void;
     setReseliedFilter:()=>void;
     getSingleRestaurant : (restaurantId:string)=>Promise<void>;
-    singleRestaurant:Restaurant | null
+    singleRestaurant:Restaurant | null;
+    resturantOrders : Orders[];
+    getRestaurantOrder : ()=>Promise<void>;
+    updateResurantOrder : (orderId:string, status:string) =>Promise<void>
   };
   

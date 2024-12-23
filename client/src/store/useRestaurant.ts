@@ -1,4 +1,5 @@
 
+import { Orders } from '@/types/orderTypes';
 import { MenuItem, RestaurantState, Restaurant } from '@/types/restaurantTypes';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -11,12 +12,13 @@ axios.defaults.withCredentials = true;
 
 export const useRestaurantStore = create<RestaurantState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       loading: false,
       restaurant: null,
       searchResults: null,
       appliedFilter: [],
       singleRestaurant :null,
+      resturantOrders:[],
       createRestaurant: async (formData: FormData) => {
         try {
           set({ loading: true });
@@ -152,7 +154,49 @@ export const useRestaurantStore = create<RestaurantState>()(
         } catch (error:any) {
           toast.error(error?.response?.data?.message || 'Something went wrong');
         }
+      },
+
+      getRestaurantOrder:async()=>{
+       try {
+          const response = await axios.get(`${API_END_POINT}/order`)
+          if(response.data.success){
+            set({resturantOrders:response.data.orders})
+          }
+       } catch (error) {
+          console.log(error);
+          
+       }
+      },
+
+      updateResurantOrder: async (orderId: string, status: string) => {
+        try {
+          const response = await axios.put(
+            `${API_END_POINT}/${orderId}`,
+            { status },
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+      
+          if (response.data.success) {
+            const updatedOrders = get().resturantOrders.map((order: Orders) =>
+              order._id === orderId ? { ...order, status: response.data.status } : order
+            );
+            set({ resturantOrders: updatedOrders });
+      
+            // Notify success
+            toast.success(response.data.message);
+          } else {
+            toast.error("Failed to update order. Server error.");
+          }
+        } catch (error) {
+          console.error("Error updating order:", error);
+          toast.error("An error occurred. Please try again later.");
+        }
       }
+      
     }),
     {
       name: 'restaurant-store',
