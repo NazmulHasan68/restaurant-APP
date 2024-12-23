@@ -11,6 +11,11 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { useUserStore } from "@/store/useUserStore";
+import { CheckoutSessionRequest } from "@/types/orderTypes";
+import { useCartStore } from "@/store/useCartStore";
+import { useRestaurantStore } from "@/store/useRestaurant";
+import { useOrderStore } from "@/store/useOrderStore";
+import { Loader2 } from "lucide-react";
 
 interface CheckoutConfirmPageProps {
   open: boolean;
@@ -22,11 +27,14 @@ export default function CheckoutConfirmPage({ open, setopen }: CheckoutConfirmPa
   const [input, setInput] = useState({
     name: user?.fullname || "",
     email: user?.email || "",
-    contact: user?.contact || "",
+    contact: user?.contact.toString() || "",
     address: user?.address || "",
     city: user?.city ||"",
     country: user?.country || "",
   });
+  const {cart} = useCartStore()
+  const {restaurant} = useRestaurantStore()
+  const {createCheckoutSession , loading} = useOrderStore()
 
   const handleClose = () => {
     setopen(false);
@@ -37,20 +45,31 @@ export default function CheckoutConfirmPage({ open, setopen }: CheckoutConfirmPa
     setInput({ ...input, [name]: value });
   };
 
-  const checkoutHandler = (e: FormEvent<HTMLFormElement>) => {
+  const checkoutHandler = async(e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Simple validation
-    for (const key in input) {
-      if (input[key as keyof typeof input].trim() === "") {
-        alert(`${key} is required`);
-        return;
-      }
-    }
-    setopen(false)
+    try {
+      const checkoutData: CheckoutSessionRequest = {
+          cartItem: cart.map((cartItem) => ({
+              menuId: cartItem._id,
+              name: cartItem.name,
+              image: cartItem.image as string,
+              price: cartItem.price ? cartItem.price.toString() : '0', 
+              quantity: cartItem.quantity.toString(),
+          })),
+          deliveryDetails: input,
+          restaurantId: restaurant?._id as string,
+      };
+      await createCheckoutSession(checkoutData)
+  
+      // Use `checkoutData` as needed
+  } catch (error) {
+      console.log(error);
+  }
+  
+  
+  
 
-    console.log("All fields are valid, proceed to payment:", input);
-    // Perform further actions like navigating to payment or API call
   };
 
   return (
@@ -131,9 +150,18 @@ export default function CheckoutConfirmPage({ open, setopen }: CheckoutConfirmPa
             <Button variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-orange hover:bg-hoverOrange">
-              Continue To Payment
-            </Button>
+            {
+              loading ? (
+                <Button disabled className="bg-orange hover:bg-hoverOrange">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin"/> Pleace wait
+                </Button>
+              ):(
+                <Button type="submit" className="bg-orange hover:bg-hoverOrange">
+                  Continue To Payment
+                </Button>
+              )
+            }
+           
           </DialogFooter>
         </form>
       </DialogContent>

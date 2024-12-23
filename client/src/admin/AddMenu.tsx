@@ -134,7 +134,7 @@ export default function AddMenu() {
                   </div>
 
                   <div>
-                    <Label>Price in (Taka)</Label>
+                    <Label>Price in ()</Label>
                     <Input
                       type="text"
                       name="price"

@@ -6,7 +6,7 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 type CheckoutSessionRequest = {
-    cartItems: {
+    cartItem: {
         menuId: string,
         name: string,
         image: string,
@@ -22,6 +22,7 @@ type CheckoutSessionRequest = {
     restaurantId: string
 };
 
+// Fetch orders for a user
 export const getOrders = async (req: Request, res: Response): Promise<void> => {
     try {
         const orders = await Order.find({ user: req.id })
@@ -38,12 +39,11 @@ export const getOrders = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
-
-
+// Create a checkout session with Stripe
 export const createCheckoutSession = async (req: Request, res: Response): Promise<void> => {
     try {
         const checkoutSessionRequest: CheckoutSessionRequest = req.body;
-        const restaurant = await Restaurant.findById(checkoutSessionRequest.restaurantId).populate('menu');
+        const restaurant = await Restaurant.findById(checkoutSessionRequest.restaurantId).populate('menus');
 
         if (!restaurant) {
             res.status(404).json({
@@ -53,29 +53,34 @@ export const createCheckoutSession = async (req: Request, res: Response): Promis
             return;
         }
 
+        // Create an order document
         const order = new Order({
             restaurant: restaurant._id,
             user: req.id,
             deliveryDetails: checkoutSessionRequest.deliveryDetails,
-            cartItems: checkoutSessionRequest.cartItems,
+            cartItems: checkoutSessionRequest?.cartItem,
             status: "pending"
         });
 
+   
         const lineItems = createLineItems(checkoutSessionRequest, restaurant.menus);
-
+        
+        // Create a Stripe session
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             shipping_address_collection: {
-                allowed_countries: ['GB', 'US', 'CA']
+                allowed_countries: ['GB', 'US', 'CA'],
             },
             line_items: lineItems,
             mode: 'payment',
             success_url: `${process.env.FRONTEND_URL}/order/status`,
             cancel_url: `${process.env.FRONTEND_URL}/cart`,
             metadata: {
-                orderId: order.id.toString(),
-                images: JSON.stringify(restaurant.menus.map((item: any) => item.image))
-            }
+                orderId: order.id?.toString() || '', // Safeguard for missing order ID
+                images: JSON.stringify(
+                    restaurant?.menus?.map((item: any) => item.image) || [] // Safeguard for missing or undefined images
+                ),
+            },
         });
 
         if (!session.url) {
@@ -83,8 +88,10 @@ export const createCheckoutSession = async (req: Request, res: Response): Promis
             return;
         }
 
+        // Save the order to the database
         await order.save();
 
+        // Return the session URL for the frontend
         res.status(200).json({
             success: true,
             session
@@ -98,23 +105,28 @@ export const createCheckoutSession = async (req: Request, res: Response): Promis
     }
 };
 
-
+// Helper function to create line items for Stripe checkout session
 export const createLineItems = (checkoutSessionRequest: CheckoutSessionRequest, menuItems: any[]): any[] => {
     try {
-        return checkoutSessionRequest.cartItems.map((cartItem) => {
+        return checkoutSessionRequest?.cartItem?.map((cartItem) => { 
             const menuItem = menuItems.find((item: any) => item._id.toString() === cartItem.menuId);
-            if (!menuItem) throw new Error(`Menu item with ID ${cartItem.menuId} not found!`);
+            
+            if (!menuItem) {
+                throw new Error(`Menu item with ID ${cartItem.menuId} not found!`);
+            }
+            const itemPrice = menuItem.price || cartItem.price;  
+            const itemImage = menuItem.image || cartItem.image;  
 
             return {
                 price_data: {
                     currency: 'USD',
                     product_data: {
-                        name: menuItem.name,
-                        images: [menuItem.image]
+                        name: menuItem.name || cartItem.name,
+                        images: [itemImage],
                     },
-                    unit_amount: menuItem.price * 100
+                    unit_amount: itemPrice * 100, 
                 },
-                quantity: cartItem.quantity
+                quantity: cartItem.quantity 
             };
         });
     } catch (error) {

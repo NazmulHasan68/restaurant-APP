@@ -121,7 +121,7 @@ function EditMenu({
             </div>
 
             <div>
-              <Label htmlFor="price">Price in Taka</Label>
+              <Label htmlFor="price">Price in </Label>
               <Input
                 id="price"
                 type="number"
