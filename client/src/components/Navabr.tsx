@@ -27,9 +27,11 @@ import {
 } from "./ui/sheet";
 import { Separator } from "./ui/separator";
 import { useUserStore } from "@/store/useUserStore";
+import { useCartStore } from "@/store/useCartStore";
 
 function Navbar() {
   const {user, loading, logout} = useUserStore()
+  const {cart} = useCartStore()
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -69,17 +71,22 @@ function Navbar() {
           <div className="md:flex items-center gap-4 hidden ">
             <Link to="/cart" className=" relative cursor-pointer ">
               <ShoppingCart />
-              <Button
-                size={"icon"}
-                className=" absolute -inset-y-3 left-2 text-xs rounded-full h-4 w-4 bg-red-500 hover:bg-red-600"
-              >
-                5
-              </Button>
+              {
+                cart.length > 0 &&(
+                <Button
+                  size={"icon"}
+                  className=" absolute -inset-y-3 left-2 text-xs rounded-full h-4 w-4 bg-red-500 hover:bg-red-600"
+                >
+                  {cart.length}
+                </Button>
+                )
+              }
             </Link>
             <div>
               <Avatar>
                 <AvatarImage
-                  src="https://github.com/shadcn.png"
+                  className="w-full h-full object-cover"
+                  src={user?.profilePicture ||"https://github.com/shadcn.png"}
                   alt="@shadcn"
                 />
                 <AvatarFallback>CN</AvatarFallback>
@@ -191,7 +198,7 @@ const MobileNavbar = () => {
         <SheetFooter className="flex flex-col items-start  gap-2">
             <div className="flex flex-row items-center gap-2">
                 <Avatar>
-                    <AvatarImage/>
+                    <AvatarImage className="w-full h-full object-cover" src={user?.profilePicture}/>
                     <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
                 <h1 className="font-bold">Nazmul hasan</h1>

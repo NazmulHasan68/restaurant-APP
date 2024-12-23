@@ -20,6 +20,7 @@ interface User {
   email: string;
   fullname: string;
   address: string;
+  contact:string;
   city: string;
   country: string;
   profilePicture: string;

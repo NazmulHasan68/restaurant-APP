@@ -10,6 +10,7 @@ import {
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+import { useUserStore } from "@/store/useUserStore";
 
 interface CheckoutConfirmPageProps {
   open: boolean;
@@ -17,13 +18,14 @@ interface CheckoutConfirmPageProps {
 }
 
 export default function CheckoutConfirmPage({ open, setopen }: CheckoutConfirmPageProps) {
+  const {user} = useUserStore()
   const [input, setInput] = useState({
-    name: "",
-    email: "",
-    contact: "",
-    address: "",
-    city: "",
-    country: "",
+    name: user?.fullname || "",
+    email: user?.email || "",
+    contact: user?.contact || "",
+    address: user?.address || "",
+    city: user?.city ||"",
+    country: user?.country || "",
   });
 
   const handleClose = () => {
@@ -78,6 +80,7 @@ export default function CheckoutConfirmPage({ open, setopen }: CheckoutConfirmPa
             <Input
               type="email"
               name="email"
+              disabled
               value={input.email}
               onChange={changeEventHandler}
               required

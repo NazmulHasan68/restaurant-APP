@@ -3,11 +3,15 @@ import { Card, CardContent, CardFooter } from "./ui/card";
 import { Button } from "./ui/button";
 import { useRestaurantStore } from "@/store/useRestaurant";
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useCartStore } from "@/store/useCartStore";
 
 function AvailableMenu() {
   const params = useParams()
+  const navigate = useNavigate()
   const {getSingleRestaurant, singleRestaurant} = useRestaurantStore()
+  const {addToCart, clearCart, removeFromCart, incrementQuantity, decrementQuantity} = useCartStore()
+
   useEffect(()=>{
     getSingleRestaurant(params.id!)
     console.log(singleRestaurant);
@@ -37,7 +41,12 @@ function AvailableMenu() {
               </h3>
             </CardContent>
             <CardFooter>
-              <Button className=" bg-orange hover:bg-hoverOrange rounded-xl w-full">Add To cart</Button>
+              <Button 
+                onClick={()=>{addToCart(item) 
+                        navigate('/cart')}} 
+                        className=" bg-orange hover:bg-hoverOrange rounded-xl w-full">
+                        Add To cart
+              </Button>
             </CardFooter>
           </Card>
           ))
