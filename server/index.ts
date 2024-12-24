@@ -9,9 +9,12 @@ import userRoute from "./routes/user.route";
 import restaurantRoute from "./routes/restaurant.route";
 import menuRoute from "./routes/menu.route";
 import orderRoute from "./routes/order.route";
+import path from 'path'
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const DIRNAME = path.resolve()
 
 // Default middleware for any MERN project
 app.use(bodyParser.json({ limit: '10mb' }));
@@ -32,6 +35,12 @@ app.use("/api/v1/user", userRoute);
 app.use("/api/v1/restaurant", restaurantRoute);
 app.use("/api/v1/menu", menuRoute);
 app.use("/api/v1/order", orderRoute);
+
+// for deploy
+app.use(express.static(path.join(DIRNAME, "client/dist")))
+app.use("*", (_, res)=>{
+  res.sendFile(path.resolve(DIRNAME, "client", "dist", "index.html"))
+})
 
 // Start the server and connect to DB
 app.listen(PORT, () => {

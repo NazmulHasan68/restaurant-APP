@@ -43,6 +43,8 @@ export const getOrders = async (req: Request, res: Response): Promise<void> => {
 export const createCheckoutSession = async (req: Request, res: Response): Promise<void> => {
     try {
         const checkoutSessionRequest: CheckoutSessionRequest = req.body;
+        console.log(checkoutSessionRequest);
+        
         const restaurant = await Restaurant.findById(checkoutSessionRequest.restaurantId).populate('menus');
 
         if (!restaurant) {

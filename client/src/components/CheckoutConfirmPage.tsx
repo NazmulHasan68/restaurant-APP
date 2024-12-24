@@ -1,4 +1,4 @@
-import React, { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import React, { Dispatch, FormEvent, SetStateAction, useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -33,7 +33,11 @@ export default function CheckoutConfirmPage({ open, setopen }: CheckoutConfirmPa
     country: user?.country || "",
   });
   const {cart} = useCartStore()
-  const {restaurant} = useRestaurantStore()
+  const {restaurant, getRestaurant} = useRestaurantStore()
+  
+  useEffect(()=>{
+    getRestaurant()
+  },[])
   const {createCheckoutSession , loading} = useOrderStore()
 
   const handleClose = () => {

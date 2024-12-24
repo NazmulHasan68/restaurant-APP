@@ -4,13 +4,14 @@ import { Timer } from "lucide-react";
 import AvailableMenu from "./AvailableMenu";
 import { useRestaurantStore } from "@/store/useRestaurant";
 function Restaurant() {
+
    const { singleRestaurant} = useRestaurantStore()
   return (
     <div className="max-w-6xl mx-auto my-10">
       <div className="w-full">
         <div className=" relative w-full h-32 mf:h-64 lg:h-72">
           <img
-            src={image}
+            src={singleRestaurant?.imageUrl}
             alt="restaurant image"
             className=" object-cover w-full h-full rounded-lg shadow-lg"
           />

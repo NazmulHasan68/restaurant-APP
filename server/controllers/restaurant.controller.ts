@@ -197,7 +197,6 @@ export const searchRestaurant = async (req: Request, res: Response): Promise<voi
             query.cuisines = { $in: selectedCuisines };
         }
 
-        console.log("Constructed Query:", JSON.stringify(query, null, 2));
 
         // Find restaurants based on the constructed query
         const restaurants = await Restaurant.find(query);
