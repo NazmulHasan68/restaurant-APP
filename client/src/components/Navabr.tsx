@@ -28,10 +28,12 @@ import {
 import { Separator } from "./ui/separator";
 import { useUserStore } from "@/store/useUserStore";
 import { useCartStore } from "@/store/useCartStore";
+import { useThemeStore } from "@/store/useThemeStore";
 
 function Navbar() {
   const {user, loading, logout} = useUserStore()
   const {cart} = useCartStore()
+  const {setTheme, theme} = useThemeStore()
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -102,8 +104,8 @@ function Navbar() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Light</DropdownMenuItem>
-                  <DropdownMenuItem>Dark</DropdownMenuItem>
+                  <DropdownMenuItem onClick={()=>setTheme('light')}>Light</DropdownMenuItem>
+                  <DropdownMenuItem onClick={()=>setTheme('dark')}>Dark</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -134,6 +136,7 @@ export default Navbar;
 
 const MobileNavbar = () => {
   const {user, logout} = useUserStore()
+  const {setTheme, theme} = useThemeStore()
   return (
     <Sheet>
       <SheetTrigger>
@@ -157,8 +160,8 @@ const MobileNavbar = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>Light</DropdownMenuItem>
-              <DropdownMenuItem>Dark</DropdownMenuItem>
+              <DropdownMenuItem onClick={()=>setTheme('light')}>Light</DropdownMenuItem>
+              <DropdownMenuItem onClick={()=>setTheme('dark')}>Dark</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </SheetHeader>

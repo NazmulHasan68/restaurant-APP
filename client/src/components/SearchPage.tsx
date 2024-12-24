@@ -14,14 +14,13 @@ const SearchPage = () => {
   const params = useParams();
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const { loading, searchRestaurant, searchResults, appliedFilter , setAppliedFilter} =
-    useRestaurantStore();
+  const { loading, searchRestaurant, searchResults, appliedFilter , setAppliedFilter} = useRestaurantStore();
 
   useEffect(() => {
     if (params.text) {
       searchRestaurant(params.text, searchQuery, appliedFilter);
     }
-  }, [params.text, searchQuery, appliedFilter, searchRestaurant]); // Add searchRestaurant as dependency
+  }, [params.text, searchQuery, appliedFilter, searchRestaurant]);
 
   return (
     <div className="max-w-7xl mx-auto my-10">

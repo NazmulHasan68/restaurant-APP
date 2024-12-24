@@ -77,6 +77,8 @@ export const useRestaurantStore = create<RestaurantState>()(
           console.error("Invalid search parameters.");
           return;
         }
+        console.log("i am run");
+        
       
         try {
           set({ loading: true });

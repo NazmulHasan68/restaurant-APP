@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom"
 function HeroSection() {
     const navigate = useNavigate()
     const [searchText, setSearchText] = useState<string>("")
+
   return (
     <div className='flex flex-col md:flex-row max-w-7xl mx-auto md:p-10 rounded-xl items-center justify-center gap-20 m-4'>
       <div className='flex flex-col gap-10 md:w-[40%]'>

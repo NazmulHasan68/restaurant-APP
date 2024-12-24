@@ -162,14 +162,15 @@ export const getRestaurantOrder = async (req: Request, res: Response): Promise<v
 };
 
 
-
 export const searchRestaurant = async (req: Request, res: Response): Promise<void> => {
     try {
-        const searchText = req.params.searchText || "";
-        const searchQuery = req.query.searchQuery as string || "";
+        const searchText = (req.params.searchText || "").trim();
+        const searchQuery = (req.query.searchQuery as string || "").trim();
         const selectedCuisines = (req.query.selectedCuisines as string || "")
             .split(",")
-            .filter((cuisine) => cuisine);
+            .filter((cuisine) => cuisine.trim());
+
+        console.log("Inputs:", { searchText, searchQuery, selectedCuisines });
 
         const query: any = {};
 
@@ -196,10 +197,10 @@ export const searchRestaurant = async (req: Request, res: Response): Promise<voi
             query.cuisines = { $in: selectedCuisines };
         }
 
+        console.log("Constructed Query:", JSON.stringify(query, null, 2));
+
         // Find restaurants based on the constructed query
         const restaurants = await Restaurant.find(query);
-
-        // Respond with the found restaurants
         res.status(200).json({
             success: true,
             data: restaurants,
@@ -208,7 +209,7 @@ export const searchRestaurant = async (req: Request, res: Response): Promise<voi
         console.error("Error searching restaurants:", error);
         res.status(500).json({
             success: false,
-            message: "Internal server error", // Include the error message for debugging
+            message: "Internal server error",
         });
     }
 };
