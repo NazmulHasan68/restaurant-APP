@@ -25,9 +25,9 @@ function Cart() {
     decrementQuantity,
   } = useCartStore();
 
-  const totalAmount = cart.reduce((acc, ele)=>{
-    return acc + ele.price*ele.quantity
-  },0)
+  const totalAmount = cart.reduce((acc, ele) => {
+    return acc + (ele?.price ?? 0) * ele.quantity;
+  }, 0);
   return (
     <div className="flex flex-col max-w-7xl mx-auto my-10">
       <div className="flex justify-end">
@@ -51,7 +51,7 @@ function Cart() {
             <TableRow key={item._id}>
               <TableCell>
                 <Avatar>
-                  <AvatarImage src={item.image}/>
+                  <AvatarImage src={item?.image}/>
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
               </TableCell>
@@ -80,7 +80,7 @@ function Cart() {
                   </Button>
                 </div>
               </TableCell>
-              <TableCell>{item?.price * item.quantity}</TableCell>
+              <TableCell>{item?.price ?? 0 * item.quantity}</TableCell>
               <TableCell className=" flex justify-end">
                 <Button onClick={()=>removeFromCart(item._id)} className="bg-orange hover:bg-hoverOrange rounded-xl">
                   Remove

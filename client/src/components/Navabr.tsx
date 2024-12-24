@@ -33,7 +33,7 @@ import { useThemeStore } from "@/store/useThemeStore";
 function Navbar() {
   const {user, loading, logout} = useUserStore()
   const {cart} = useCartStore()
-  const {setTheme, theme} = useThemeStore()
+  const {setTheme} = useThemeStore()
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -136,7 +136,7 @@ export default Navbar;
 
 const MobileNavbar = () => {
   const {user, logout} = useUserStore()
-  const {setTheme, theme} = useThemeStore()
+  const {setTheme} = useThemeStore()
   return (
     <Sheet>
       <SheetTrigger>

@@ -2,7 +2,7 @@ import { MenuItem } from "./restaurantTypes";
 
 // Extending MenuItem with a quantity field for cart items
 interface CartItem extends MenuItem {
-  quantity: number;
+  quantity: number ;
 }
 
 // Defining the state and actions for the cart

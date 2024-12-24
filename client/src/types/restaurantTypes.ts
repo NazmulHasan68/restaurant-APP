@@ -5,7 +5,8 @@ export type MenuItem = {
     _id: string;
     name: string;
     description?: string;
-    price?: number;
+    price?: number | undefined;
+    image?:string;
   };
   
 export type Restaurant = {
@@ -45,4 +46,6 @@ export  type RestaurantState = {
     getRestaurantOrder : ()=>Promise<void>;
     updateResurantOrder : (orderId:string, status:string) =>Promise<void>
   };
+
+  
   

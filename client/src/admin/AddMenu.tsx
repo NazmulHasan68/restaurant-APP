@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import Image from "@/assets/herroImage.png";
 import {
   Dialog,
   DialogContent,

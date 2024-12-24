@@ -1,4 +1,4 @@
-import image from "@/assets/herroImage.png";
+
 import { Badge } from "./ui/badge";
 import { Timer } from "lucide-react";
 import AvailableMenu from "./AvailableMenu";

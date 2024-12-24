@@ -1,4 +1,4 @@
-import image from "@/assets/herroImage.png";
+
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Button } from "./ui/button";
 import { useRestaurantStore } from "@/store/useRestaurant";
@@ -10,7 +10,7 @@ function AvailableMenu() {
   const params = useParams()
   const navigate = useNavigate()
   const {getSingleRestaurant, singleRestaurant} = useRestaurantStore()
-  const {addToCart, clearCart, removeFromCart, incrementQuantity, decrementQuantity} = useCartStore()
+  const {addToCart} = useCartStore()
 
   useEffect(()=>{
     getSingleRestaurant(params.id!)
@@ -27,7 +27,7 @@ function AvailableMenu() {
           singleRestaurant?.menus.map((item, index)=>(
             <Card key={index} className="max-w-sm mx-auto shadow-lg rounded-xl overflow-hidden hover:shadow-xl duration-300">
             <img
-              src={item.image}
+              src={item?.image}
               alt="food image"
               className="w-full h-48 object-cover"
             />

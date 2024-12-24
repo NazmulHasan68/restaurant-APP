@@ -1,10 +1,10 @@
-import React, { FormEvent, useState, ChangeEvent } from "react";
+import { FormEvent, useState, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { SignupInputState, userSignupSchema } from "@/schema/userSchema";
 import { useUserStore } from "@/store/useUserStore";
-import { Contact, Loader2, LockKeyhole, Mail, Phone, User } from "lucide-react";
+import {  Loader2, LockKeyhole, Mail, Phone, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 const Signup = () => {

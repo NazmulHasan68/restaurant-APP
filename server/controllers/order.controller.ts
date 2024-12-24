@@ -10,8 +10,8 @@ type CheckoutSessionRequest = {
         menuId: string,
         name: string,
         image: string,
-        price: number,
-        quantity: number
+        price: number | undefined,
+        quantity: number  | undefined
     }[],
     deliveryDetails: {
         name: string,

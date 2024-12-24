@@ -4,12 +4,12 @@ import { Separator } from "@/components/ui/separator";
 import { LoginInputState, userLoginSchema } from "@/schema/userSchema";
 import { useUserStore } from "@/store/useUserStore";
 import { Loader2, LockKeyhole, Mail } from "lucide-react";
-import React, { FormEvent, useState, ChangeEvent } from "react";
+import { FormEvent, useState, ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const { login, loading } = useUserStore();
-  const {navigate} = useNavigate()
+  const navigate = useNavigate()
   const [input, setInput] = useState<LoginInputState>({
     email: "",
     password: "",

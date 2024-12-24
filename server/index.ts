@@ -37,10 +37,10 @@ app.use("/api/v1/menu", menuRoute);
 app.use("/api/v1/order", orderRoute);
 
 // for deploy
-app.use(express.static(path.join(DIRNAME, "client/dist")))
-app.use("*", (_, res)=>{
-  res.sendFile(path.resolve(DIRNAME, "client", "dist", "index.html"))
-})
+app.use(express.static(path.join(DIRNAME, "client/dist")));  // Use build instead of dist
+app.use("*", (_, res) => {
+  res.sendFile(path.resolve(DIRNAME, "client", "dist", "index.html"));  // Same here
+});
 
 // Start the server and connect to DB
 app.listen(PORT, () => {

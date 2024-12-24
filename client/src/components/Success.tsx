@@ -1,5 +1,4 @@
 
-import { IndianRupee } from "lucide-react";
 import { Separator } from "./ui/separator";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
@@ -38,7 +37,7 @@ const Success = () => {
           {/* Your Ordered Item Display here  */}
           {orders.map((order:any, index:number) => (
             <div key={index}>
-              {order.cartItems.map((item:CartItem) => (
+              {order.cartItems.map((item:any) => (
                 <div className="mb-4">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">

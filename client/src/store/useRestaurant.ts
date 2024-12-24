@@ -1,6 +1,6 @@
 
 import { Orders } from '@/types/orderTypes';
-import { MenuItem, RestaurantState, Restaurant } from '@/types/restaurantTypes';
+import { MenuItem, RestaurantState } from '@/types/restaurantTypes';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { create } from 'zustand';

@@ -57,7 +57,7 @@ export default function CheckoutConfirmPage({ open, setopen }: CheckoutConfirmPa
           cartItem: cart.map((cartItem) => ({
               menuId: cartItem._id,
               name: cartItem.name,
-              image: cartItem.image as string,
+              image: cartItem?.image as string,
               price: cartItem.price ? cartItem.price.toString() : '0', 
               quantity: cartItem.quantity.toString(),
           })),

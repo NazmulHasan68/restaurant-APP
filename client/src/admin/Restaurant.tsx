@@ -74,10 +74,10 @@ function RestaurantAdmin() {
       await getRestaurant()
       setinput({
         restaurantname:restaurant?.restaurantname || "",
-        city: restaurant.city ||"",
-        country:restaurant.country || "",
-        deliveryTime: restaurant.deliveryTime || 0,
-        cuisines: restaurant.cuisines ? restaurant.cuisines.map((cuisine:string) => cuisine) : [],
+        city: restaurant?.city ||"",
+        country:restaurant?.country || "",
+        deliveryTime: restaurant?.deliveryTime || 0,
+        cuisines: restaurant?.cuisines ? restaurant?.cuisines.map((cuisine:string) => cuisine) : [],
         imageFile: undefined,
       })
     }

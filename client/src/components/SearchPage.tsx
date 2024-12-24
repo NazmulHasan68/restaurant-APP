@@ -10,12 +10,22 @@ import FilterPage from "./FilterPage";
 import { useRestaurantStore } from "@/store/useRestaurant";
 import { Restaurant } from "@/types/restaurantTypes";
 
+// interface SearchResults {
+//   data: Restaurant[]; // Assuming 'data' is an array of Restaurant objects
+// }
+// const searchResults: SearchResults | null
+
 const SearchPage = () => {
   const params = useParams();
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const { loading, searchRestaurant, searchResults, appliedFilter , setAppliedFilter} = useRestaurantStore();
-
+  const {
+    loading,
+    searchRestaurant,
+    searchResults,
+    appliedFilter,
+    setAppliedFilter,
+  } = useRestaurantStore();
   useEffect(() => {
     if (params.text) {
       searchRestaurant(params.text, searchQuery, appliedFilter);
@@ -52,7 +62,7 @@ const SearchPage = () => {
             {/* Result Info */}
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-2 my-3">
               <h1 className="font-medium text-lg">
-                ({searchResults?.data?.length || 0}) Search result(s) found
+                ({0}) Search result(s) found
               </h1>
               <div className="flex flex-wrap gap-2">
                 {appliedFilter.map((filter, idx) => (
@@ -63,7 +73,7 @@ const SearchPage = () => {
                   >
                     {filter}
                     <X
-                      onClick={()=>setAppliedFilter(filter)}
+                      onClick={() => setAppliedFilter(filter)}
                       size={16}
                       className="absolute text-[#D19254] right-1 cursor-pointer"
                     />
@@ -74,17 +84,17 @@ const SearchPage = () => {
 
             {/* Restaurant Cards */}
             <div className="grid md:grid-cols-3 gap-4">
-              {loading ? (
-                <SearchSkeleton />
-              ) : searchResults?.data?.length > 0 ? (
-                searchResults?.data.map(
-                  (restaurant: Restaurant, idx: number) => (
+              <div className="grid md:grid-cols-3 gap-4">
+                {loading ? (
+                  <SearchSkeleton />
+                ) : searchResults && searchResults.length > 0 ? (
+                  searchResults.map((restaurant: Restaurant, idx: number) => (
                     <RestaurantCard key={idx} restaurant={restaurant} />
-                  )
-                )
-              ) : (
-                <NoResultFound searchText={params.text!} />
-              )}
+                  ))
+                ) : (
+                  <NoResultFound searchText={params.text!} />
+                )}
+              </div>
             </div>
           </div>
         </div>
